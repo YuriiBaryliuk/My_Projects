@@ -6,6 +6,5 @@ internal class Program
     {
         ReaderManager rm = new ReaderManager();
         rm.printReadersRegister();
-        rm.printReadersRegister();
     }
 }
