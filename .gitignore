@@ -476,6 +476,7 @@ $RECYCLE.BIN/
 *.msix
 *.msm
 *.msp
+*.vs
 
 # Windows shortcuts
 *.lnk
