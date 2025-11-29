@@ -17,6 +17,21 @@ namespace Biblioteka_Projekt
 
         public void addToReadersRegister(Reader reader) => readersRegister.Add(reader);
 
+        // adds last inputed reader
+        public void addToReadersFileDB()
+        {
+            IOFileManager.writeReaderToFile(this);
+        }
+        public Reader? getLastReader()
+        {
+            if (readersRegister.Count != 0)
+                return readersRegister.ElementAt(readersRegister.Count - 1);
+            else{
+                Console.WriteLine("Readers database is empty");
+                return null;
+            }
+        }
+
         public void printReadersRegister()
         {
             foreach (Reader i in readersRegister)

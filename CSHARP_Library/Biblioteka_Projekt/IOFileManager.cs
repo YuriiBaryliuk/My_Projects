@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace Biblioteka_Projekt
@@ -49,13 +48,36 @@ namespace Biblioteka_Projekt
             }
         }
 
-        public static void writeToFile(ReaderManager reader)
+        public static void writeLogToFile(string logDirectory, string log){
+            string dateTimeOfLog = DateTime.Now.ToString();
+            File.AppendAllText(logDirectory, "\n" + dateTimeOfLog + ": " + log);
+        }
+
+        public static void writeReaderToFile(ReaderManager reader)
         {
             if (!File.Exists(reader.readers_db_path))
             {
+                File.Create(reader.readers_db_path);
+            }
+            Reader? tempReader = reader.getLastReader();
+            if (tempReader != null)
+            {
+                string tempStr = "";
+                tempStr += "\nID: " + tempReader.m_ID + "\n";
+                tempStr += "Name: " + tempReader.m_name + "\n";
+                tempStr += "Surname: " + tempReader.m_surname + "\n";
+                tempStr += "DateOfBirth: " + Convert.ToString(tempReader.m_dateOfBirth.Day) + 
+                    "." + Convert.ToString(tempReader.m_dateOfBirth.Month) +
+                    "." + Convert.ToString(tempReader.m_dateOfBirth.Year) + "\n";
+                tempStr += "Address: " + tempReader.m_address.s_streetName +
+                    ", " + tempReader.m_address.s_streetName +
+                    ", " + tempReader.m_address.s_flatNumber + "\n";
+                tempStr += "Phone number: " + tempReader.m_phoneNumber;
 
+                File.AppendAllText(reader.readers_db_path, tempStr);
             }
         }
+
         private static string dropReaderKeys(string line) 
         { 
             string[] keyAndValue = line.Split(':');
