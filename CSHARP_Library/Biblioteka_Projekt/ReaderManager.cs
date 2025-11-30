@@ -18,16 +18,17 @@ namespace Biblioteka_Projekt
         public void addToReadersRegister(Reader reader) => readersRegister.Add(reader);
 
         // adds last inputed reader
-        public void addToReadersFileDB()
-        {
-            IOFileManager.writeReaderToFile(this);
-        }
+        //public void addToReadersFileDB()
+        //{
+        //    IOFileManager.writeReaderToFile(this);
+        //}
         public Reader? getLastReader()
         {
             if (readersRegister.Count != 0)
                 return readersRegister.ElementAt(readersRegister.Count - 1);
             else{
-                Console.WriteLine("Readers database is empty");
+                Logs.writeLog("Trying to get last element from Readers register. Registers register is empty.");
+                Console.WriteLine("Readers register is empty");
                 return null;
             }
         }
@@ -36,6 +37,16 @@ namespace Biblioteka_Projekt
         {
             foreach (Reader i in readersRegister)
                 i.printData();
+        }
+
+        public void inputReader()
+        {
+            InputManager.InputReader(this);
+        }
+
+        public void loadReaderToFile(Reader reader)
+        {
+            IOFileManager.writeReaderToFile(readers_db_path, reader);
         }
     }
 }

@@ -16,7 +16,6 @@ namespace Biblioteka_Projekt
         public static bool checkPersonName(string name)
         {
             name = char.ToUpper(name[0]) + name.Substring(1);
-            Console.WriteLine(name);
             if(Regex.IsMatch(name, regexNamePattern))
                 return true;
             return false;
@@ -31,7 +30,7 @@ namespace Biblioteka_Projekt
         public static bool checkPersonDate(string year, string month, string day)
         {
             string fullDate = year + "-" + month + "-" + day;
-            if (DateTime.TryParse(fullDate, out DateTime res))
+            if (DateOnly.TryParse(fullDate, out DateOnly res))
                 return true;
             return false;
         }

@@ -3,30 +3,16 @@ using System.Text;
 
 namespace Biblioteka_Projekt
 {
-    public struct AddressStruct{
-        public string s_streetName{ get; private set; }
-        public string s_houseNumber{ get; private set; }
-        public string s_flatNumber{ get; private set; }
-        public AddressStruct(string streetName, string houseNumber, string flatNumber = "-")
-        {
-            s_streetName = streetName;
-            s_houseNumber = houseNumber;
-            s_flatNumber = flatNumber;
-        }
-        public string getAddress(){
-            return $"Street name: {s_streetName}, House number: {s_houseNumber}, Flat number: {s_flatNumber}";
-        }
-    }
     internal class Person
     {
         public string m_name { get; private set; }
         public string m_surname { get; private set; }
-        public DateTime m_dateOfBirth { get; private set; }
+        public DateOnly m_dateOfBirth { get; private set; }
         public int m_age{ get; private set; }
-        public AddressStruct m_address{ get; private set; }
+        public Address m_address{ get; private set; }
         public string m_phoneNumber{ get; private set; }
 
-        public Person(string name, string surname, DateTime dateOfBirth, AddressStruct address, string phoneNumber)
+        public Person(string name, string surname, DateOnly dateOfBirth, Address address, string phoneNumber)
         {
             m_name = name;
             m_surname = surname;
@@ -38,7 +24,7 @@ namespace Biblioteka_Projekt
 
         private int calculateAge()
         {
-            DateTime tempDate = new DateTime(m_dateOfBirth.Year, DateTime.Now.Month, DateTime.Now.Day);
+            DateOnly tempDate = new DateOnly(m_dateOfBirth.Year, DateTime.Now.Month, DateTime.Now.Day);
             if (m_dateOfBirth <= tempDate)
                 return DateTime.Now.Year - m_dateOfBirth.Year;
             return DateTime.Now.Year - m_dateOfBirth.Year - 1;
@@ -47,7 +33,7 @@ namespace Biblioteka_Projekt
         public virtual void printData()
         {
             Console.WriteLine($"Name: {m_name}\nSurname: {m_surname}\nAge: {m_age}\n" +
-                $"Address: {m_address.getAddress()}\n" +
+                $"Address: {m_address.printAddress()}\n" +
                 $"Phone number: {m_phoneNumber}\n");
         }
     }

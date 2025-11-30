@@ -9,19 +9,19 @@ namespace Biblioteka_Projekt
         public int m_ID { get; private set; }
         public DateTime m_dateOfRegistration{ get; private set; }
 
-        public Reader(string name, string surname, DateTime dateOfBirth, AddressStruct address, string phoneNumber) :
+        public Reader(string name, string surname, DateOnly dateOfBirth, Address address, string phoneNumber, DateTime dateOfRegistration) :
             base(name, surname, dateOfBirth, address, phoneNumber)
         {
-            m_dateOfRegistration = DateTime.Now;
+            m_dateOfRegistration = dateOfRegistration;
             m_ID = nextID++;
         }
 
         public override void printData()
         {
             Console.WriteLine($"ID: {m_ID}\nName: {m_name}\nSurname: {m_surname}\nAge: {m_age}\n" +
-                $"Address: {m_address.getAddress()}\n" +
+                $"Address: {m_address.printAddress()}\n" +
                 $"Phone number: {m_phoneNumber}\n" +
-                $"Registration date: {m_dateOfRegistration.Day}.{m_dateOfRegistration.Month}.{m_dateOfRegistration.Year}\n");
+                $"Registration date: {m_dateOfRegistration.ToString()}\n");
         }
     }
 }

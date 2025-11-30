@@ -5,11 +5,11 @@ namespace Biblioteka_Projekt
 {
     internal class InputManager
     {
-        public static void InputReader()
+        public static void InputReader(ReaderManager rm)
         {
             string name, surname;
-            DateTime dateOfBirth;
-            AddressStruct address;
+            DateOnly dateOfBirth;
+            Address address;
             string phoneNumber;
 
             Console.WriteLine("Enter Reader's data below");
@@ -19,8 +19,9 @@ namespace Biblioteka_Projekt
             address = inputReaderAddress();
             phoneNumber = singleInputReaderInit("phone", InputCheck.checkPersonPhone);
 
-            Reader r = new Reader(name, surname, dateOfBirth, address, phoneNumber);
-            r.printData();
+            Reader r = new Reader(name, surname, dateOfBirth, address, phoneNumber, DateTime.Now);
+            rm.addToReadersRegister(r);
+            rm.loadReaderToFile(r);
         }
         private static string singleInputReaderInit(string parameterName, Predicate<string> initValue){
             string? param;
@@ -46,7 +47,7 @@ namespace Biblioteka_Projekt
             return param;
         }
 
-        private static DateTime inputReaderDate()
+        private static DateOnly inputReaderDate()
         {
             string? day, month, year;
             while (true)
@@ -74,10 +75,10 @@ namespace Biblioteka_Projekt
                 else
                     break;
             }
-            return new DateTime(Convert.ToInt16(year), Convert.ToInt16(month), Convert.ToInt16(day));
+            return new DateOnly(Convert.ToInt16(year), Convert.ToInt16(month), Convert.ToInt16(day));
         }
         
-        private static AddressStruct inputReaderAddress()
+        private static Address inputReaderAddress()
         {
             string? streetName, houseNumber, flatNumber;
             while (true)
@@ -105,7 +106,7 @@ namespace Biblioteka_Projekt
                 else
                     break;
             }
-            return new AddressStruct(streetName, houseNumber, flatNumber);
+            return new Address(streetName, houseNumber, flatNumber);
         }
 
         //private static string inputReaderName()

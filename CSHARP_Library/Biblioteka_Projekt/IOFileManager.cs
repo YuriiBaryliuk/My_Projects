@@ -8,7 +8,7 @@ namespace Biblioteka_Projekt
         public static List<Reader> initReaderRegFromFileDB(string path)
         {
             if (!File.Exists(path)){
-                Console.WriteLine("Can't find readers database (Readers_DB.txt)");
+                Logs.writeLog("Can't find readers database (Readers_DB.txt)");
                 return new List<Reader>();
             }
             else
@@ -20,30 +20,37 @@ namespace Biblioteka_Projekt
 
                     if (lineArrLen == 0)
                     {
-                        Console.WriteLine("Readers_DB is empty");
+                        Logs.writeLog("Readers_DB is empty");
                         return new List<Reader>();
                     }
+                    try{
+                        List<Reader> tempReaderRegister = new List<Reader>();
+                        int i = 1;
+                        while(i < lineArrLen)
+                        {
+                            string name, surname, phone;
+                            DateOnly dateOfBirth;
+                            Address address;
+                            DateTime dateOfRegistration;
 
-                    List<Reader> tempReaderRegister = new List<Reader>();
-                    for(int i = 1; i < lineArrLen; i+=MyConstants.readerParameters + 1)
-                    {
-                        string name, surname, phone;
-                        DateTime dateOfBirth;
-                        AddressStruct address;
+                            name = dropReaderKeys(lineArray[i++]);
+                            surname = dropReaderKeys(lineArray[i++]);
+                            dateOfBirth = DateOnly.Parse(dropReaderKeys(lineArray[i++]));
+                            address = Address.toAddress(dropReaderKeys(lineArray[i++]));
+                            phone = dropReaderKeys(lineArray[i++]);
+                            dateOfRegistration = DateTime.Parse(dropReaderKeys(lineArray[i++]));
+                            ++i;
 
-                        name = dropReaderKeys(lineArray[i]);
-                        surname = dropReaderKeys(lineArray[i + 1]);
-                        dateOfBirth = MyTypeConverter.fromStringToDateTime(dropReaderKeys(lineArray[i + 2]));
-                        address = MyTypeConverter.fromStringToAddress(dropReaderKeys(lineArray[i + 3]));
-                        phone = dropReaderKeys(lineArray[i + 4]);
-
-                        //Console.WriteLine($"{name}\n{surname}\n{dateOfBirth}\n{address}\n{phone}\n");
-
-                        Reader newR = new Reader(name, surname, dateOfBirth, address, phone);
-                        tempReaderRegister.Add(newR);
+                            Reader newR = new Reader(name, surname, dateOfBirth, address, phone, dateOfRegistration);
+                            tempReaderRegister.Add(newR);
+                        }
+                        return tempReaderRegister;
                     }
-
-                    return tempReaderRegister;
+                    catch (Exception e)
+                    {
+                        Logs.writeLog(e.Message + " Readers were not initialized properly.");
+                        return new List<Reader>();
+                    }
                 }
             }
         }
@@ -53,34 +60,23 @@ namespace Biblioteka_Projekt
             File.AppendAllText(logDirectory, "\n" + dateTimeOfLog + ": " + log);
         }
 
-        public static void writeReaderToFile(ReaderManager reader)
+        public static void writeReaderToFile(string path, Reader reader)
         {
-            if (!File.Exists(reader.readers_db_path))
-            {
-                File.Create(reader.readers_db_path);
-            }
-            Reader? tempReader = reader.getLastReader();
-            if (tempReader != null)
-            {
-                string tempStr = "";
-                tempStr += "\nID: " + tempReader.m_ID + "\n";
-                tempStr += "Name: " + tempReader.m_name + "\n";
-                tempStr += "Surname: " + tempReader.m_surname + "\n";
-                tempStr += "DateOfBirth: " + Convert.ToString(tempReader.m_dateOfBirth.Day) + 
-                    "." + Convert.ToString(tempReader.m_dateOfBirth.Month) +
-                    "." + Convert.ToString(tempReader.m_dateOfBirth.Year) + "\n";
-                tempStr += "Address: " + tempReader.m_address.s_streetName +
-                    ", " + tempReader.m_address.s_streetName +
-                    ", " + tempReader.m_address.s_flatNumber + "\n";
-                tempStr += "Phone number: " + tempReader.m_phoneNumber;
+            string tempStr = "";
+            tempStr += "ID: " + reader.m_ID + "\n";
+            tempStr += "Name: " + MyReformatting.firstLetterToUpper(reader.m_name) + "\n";
+            tempStr += "Surname: " + MyReformatting.firstLetterToUpper(reader.m_surname) + "\n";
+            tempStr += "Date Of Birth: " + reader.m_dateOfBirth.ToString("yyyy-MM-dd") + "\n";
+            tempStr += "Address: " + reader.m_address.ToString() + "\n";
+            tempStr += "Phone Number: " + MyReformatting.toPhoneNumberPL(reader.m_phoneNumber) + "\n";
+            tempStr += "Date Of Registration: " + reader.m_dateOfRegistration.ToString() + "\n";
 
-                File.AppendAllText(reader.readers_db_path, tempStr);
-            }
+            File.AppendAllText(path, tempStr);
         }
 
         private static string dropReaderKeys(string line) 
-        { 
-            string[] keyAndValue = line.Split(':');
+        {
+            string[] keyAndValue = line.Split(":", 2);
             string value = keyAndValue[1].Substring(1);
             return value;
         }
