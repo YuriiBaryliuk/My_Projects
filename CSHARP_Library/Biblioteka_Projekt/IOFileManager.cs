@@ -5,6 +5,7 @@ namespace Biblioteka_Projekt
 {
     static internal class IOFileManager
     {
+        //-----------------Readers-----------------//
         public static List<Reader> initReaderRegFromFileDB(string path)
         {
             if (!File.Exists(path)){
@@ -33,12 +34,12 @@ namespace Biblioteka_Projekt
                             Address address;
                             DateTime dateOfRegistration;
 
-                            name = dropReaderKeys(lineArray[i++]);
-                            surname = dropReaderKeys(lineArray[i++]);
-                            dateOfBirth = DateOnly.Parse(dropReaderKeys(lineArray[i++]));
-                            address = Address.toAddress(dropReaderKeys(lineArray[i++]));
-                            phone = dropReaderKeys(lineArray[i++]);
-                            dateOfRegistration = DateTime.Parse(dropReaderKeys(lineArray[i++]));
+                            name = dropEntityKeys(lineArray[i++]);
+                            surname = dropEntityKeys(lineArray[i++]);
+                            dateOfBirth = DateOnly.Parse(dropEntityKeys(lineArray[i++]));
+                            address = Address.toAddress(dropEntityKeys(lineArray[i++]));
+                            phone = dropEntityKeys(lineArray[i++]);
+                            dateOfRegistration = DateTime.Parse(dropEntityKeys(lineArray[i++]));
                             ++i;
 
                             Reader newR = new Reader(name, surname, dateOfBirth, address, phone, dateOfRegistration);
@@ -74,7 +75,66 @@ namespace Biblioteka_Projekt
             File.AppendAllText(path, tempStr);
         }
 
-        private static string dropReaderKeys(string line) 
+        //-----------------Books-----------------//
+
+        public static List<Book> initBookRegFromFileDB(string path)
+        {
+            if (!File.Exists(path)){
+                Logs.writeLog("Can't find books database (Books_DB.txt)");
+                return new List<Book>();
+            }
+            else
+            {
+                using (StreamReader sr = File.OpenText(path))
+                {
+                    string[] lineArray = File.ReadAllLines(path);
+                    int lineArrLen = lineArray.Length;
+
+                    if (lineArrLen == 0)
+                    {
+                        Logs.writeLog("Books_DB is empty");
+                        return new List<Book>();
+                    }
+                    try{
+                        List<Book> tempBookRegister = new List<Book>();
+                        int i = 1;
+                        while(i < lineArrLen)   //? rozny cykl
+                        {
+                            string author, title, genre;
+                            int yearOfRelease;
+
+                            author = dropEntityKeys(lineArray[i++]);
+                            title = dropEntityKeys(lineArray[i++]);
+                            yearOfRelease = Convert.ToInt32(dropEntityKeys(lineArray[i++]));
+                            genre = dropEntityKeys(lineArray[i++]);
+                            ++i;
+
+                            Book newB = new Book(author, title, yearOfRelease, genre);
+                            tempBookRegister.Add(newB);
+                        }
+                        return tempBookRegister;
+                    }
+                    catch (Exception e)
+                    {
+                        Logs.writeLog(e.Message + " Books were not initialized properly.");
+                        return new List<Book>();
+                    }
+                }
+            }
+        }
+
+        public static void writeBookToFile(string path, Book book)
+        {
+            string tempStr = "";
+            tempStr += "ID: " + book.m_ID + "\n";
+            tempStr += "Author: " + MyReformatting.firstLetterToUpper(book.m_author) + "\n";
+            tempStr += "Title: " + MyReformatting.firstLetterToUpper(book.m_title) + "\n";
+            tempStr += "Date Of Release: " + book.m_yearOfRelease.ToString() + "\n";
+            tempStr += "Genre: " + MyReformatting.firstLetterToUpper(book.m_genre) + "\n";
+
+            File.AppendAllText(path, tempStr);
+        }
+        private static string dropEntityKeys(string line) 
         {
             string[] keyAndValue = line.Split(":", 2);
             string value = keyAndValue[1].Substring(1);

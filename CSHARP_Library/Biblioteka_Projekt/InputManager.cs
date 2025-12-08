@@ -5,6 +5,7 @@ namespace Biblioteka_Projekt
 {
     internal class InputManager
     {
+        //-----------------Readers-----------------//
         public static void InputReader(ReaderManager rm)
         {
             string name, surname;
@@ -13,17 +14,34 @@ namespace Biblioteka_Projekt
             string phoneNumber;
 
             Console.WriteLine("Enter Reader's data below");
-            name = singleInputReaderInit("name", InputCheck.checkPersonName);
-            surname = singleInputReaderInit("surname", InputCheck.checkPersonSurame);
+            name = singleInputInit("name", InputCheck.checkPersonName);
+            surname = singleInputInit("surname", InputCheck.checkPersonSurame);
             dateOfBirth = inputReaderDate();
             address = inputReaderAddress();
-            phoneNumber = singleInputReaderInit("phone", InputCheck.checkPersonPhone);
+            phoneNumber = singleInputInit("phone", InputCheck.checkPersonPhone);
 
             Reader r = new Reader(name, surname, dateOfBirth, address, phoneNumber, DateTime.Now);
             rm.addToReadersRegister(r);
             rm.loadReaderToFile(r);
         }
-        private static string singleInputReaderInit(string parameterName, Predicate<string> initValue){
+        private static string singleInputInit(string parameterName, Predicate<string> initValue)
+        {
+            string param;
+            while(true){
+            param = initAndCheckIfNull(parameterName);
+                if(!initValue(param))
+                {
+                    Logs.writeLog($"Entered item: \"{parameterName}\" is not compatible with regular expression");
+                    Console.WriteLine($"Entered {parameterName} is not valid, try again");
+                    continue;
+                }
+                break;
+            }
+            return param;
+        }
+
+        private static string initAndCheckIfNull(string parameterName)
+        {
             string? param;
             while (true)
             {
@@ -32,17 +50,11 @@ namespace Biblioteka_Projekt
 
                 if (string.IsNullOrEmpty(param))
                 {
-                    Logs.writeLog($"Entered Reader's {parameterName} is empty or null");
+                    Logs.writeLog($"Entered item: \"{parameterName}\" is empty or null");
                     Console.WriteLine($"Entered {parameterName} is not valid, try again");
                     continue;
                 }
-                else if(!initValue(param)){
-                    Logs.writeLog($"Entered Reader's {parameterName} is not compatible with regular expression");
-                    Console.WriteLine($"Entered {parameterName} is not valid, try again");
-                    continue;
-                }
-                else
-                    break;
+                break;
             }
             return param;
         }
@@ -66,7 +78,7 @@ namespace Biblioteka_Projekt
                     Console.WriteLine("Entered date of birh is not valid, try again");
                     continue;
                 }
-                else if (!InputCheck.checkPersonDate(year, month, day))
+                else if (!InputCheck.checkDate(year, month, day))
                 {
                     Logs.writeLog("Entered Reader's date of birth is not compatible with regular expression");
                     Console.WriteLine("Entered date of birth is not valid, try again");
@@ -78,6 +90,7 @@ namespace Biblioteka_Projekt
             return new DateOnly(Convert.ToInt16(year), Convert.ToInt16(month), Convert.ToInt16(day));
         }
         
+        //?Czy podzielic
         private static Address inputReaderAddress()
         {
             string? streetName, houseNumber, flatNumber;
@@ -107,6 +120,41 @@ namespace Biblioteka_Projekt
                     break;
             }
             return new Address(streetName, houseNumber, flatNumber);
+        }
+
+        //-----------------Books-----------------//
+        public static void InputBook(BookManager bm)
+        {
+            string author, title, genre;
+            int yearOfRelease;
+
+            Console.WriteLine("Enter Book's data below");
+            author = singleInputInit("author", InputCheck.checkAuthorName);
+            title = initAndCheckIfNull("title");
+            yearOfRelease = initBookYear();
+            genre = initAndCheckIfNull("genre");
+
+            Book b = new Book(author, title, yearOfRelease, genre);
+            bm.addToBooksRegister(b);
+            bm.loadBookToFile(b);
+        }
+
+        private static int initBookYear()
+        {
+            string bookYear;
+            const string parameterName = "Year of book release";
+            while(true){
+            bookYear = initAndCheckIfNull(parameterName);
+            
+                if(!InputCheck.checkBookYear(bookYear))
+                {
+                    Logs.writeLog($"Entered item: \"{parameterName}\" is not compatible with regular expression");
+                    Console.WriteLine($"Entered {parameterName} is not valid, try again");
+                    continue;
+                }
+                break;
+            }
+            return Convert.ToInt32(bookYear);
         }
 
         //private static string inputReaderName()

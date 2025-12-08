@@ -16,18 +16,12 @@ namespace Biblioteka_Projekt
         }
 
         public void addToReadersRegister(Reader reader) => readersRegister.Add(reader);
-
-        // adds last inputed reader
-        //public void addToReadersFileDB()
-        //{
-        //    IOFileManager.writeReaderToFile(this);
-        //}
         public Reader? getLastReader()
         {
             if (readersRegister.Count != 0)
                 return readersRegister.ElementAt(readersRegister.Count - 1);
             else{
-                Logs.writeLog("Trying to get last element from Readers register. Registers register is empty.");
+                Logs.writeLog("Trying to get last element from Readers register. Readers register is empty.");
                 Console.WriteLine("Readers register is empty");
                 return null;
             }

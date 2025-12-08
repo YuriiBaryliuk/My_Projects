@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Biblioteka_Projekt
 {
@@ -9,9 +11,11 @@ namespace Biblioteka_Projekt
     {
         const string regexNamePattern = @"^[A-Za-zŁŚŻąćęłńóśżź]+$";
         const string regexSurnamePattern = @"^[A-Za-zĆŁŚŻąćęłńóśżź]{2,}$";
-        const string regexStreetNamePattern = @"^[A-Za-z0-9\s,.\-/]{2,100}$";
+        const string regexStreetNamePattern = @"^[A-Za-z0-9ĆŁŚŻąćęłńóśżź\s,.\-/]{2,100}$";
         const string regexHouseFlatPattern = @"^[A-Za-z0-9ĆŁŚŻąćęłńóśżź]{1,10}$";
         const string regexPhonePattern = @"^\d{9}$";
+        const string regexAuthorPattern = @"^[A-za-z0-9\s,.\-/&]{2,100}$";
+        const string regexReleaseYearPattern = @"^\d{1,4}$";
 
         public static bool checkPersonName(string name)
         {
@@ -27,11 +31,12 @@ namespace Biblioteka_Projekt
                 return true;
             return false;
         }
-        public static bool checkPersonDate(string year, string month, string day)
+        public static bool checkDate(string year, string month = "01", string day = "01")
         {
             string fullDate = year + "-" + month + "-" + day;
             if (DateOnly.TryParse(fullDate, out DateOnly res))
-                return true;
+                if (res <= DateOnly.FromDateTime(DateTime.Now))
+                    return true;
             return false;
         }
         public static bool checkPersonAddress(string streetName, string houseNumber, string flatNumber)
@@ -46,6 +51,21 @@ namespace Biblioteka_Projekt
         {
             if(Regex.IsMatch(phone, regexPhonePattern))
                 return true;
+            return false;
+        }
+
+        public static bool checkAuthorName(string author)
+        {
+            if(Regex.IsMatch(author, regexAuthorPattern))
+                return true;
+            return false;
+        }
+
+        public static bool checkBookYear(string year)
+        {
+            if(Regex.IsMatch(year, regexReleaseYearPattern))
+                if (Convert.ToInt32(year) <= DateTime.Now.Year)
+                    return true;
             return false;
         }
 
