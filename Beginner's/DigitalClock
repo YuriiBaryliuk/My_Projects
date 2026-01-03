@@ -1,0 +1,22 @@
+#pragma warning(disable: 4996)
+#include <iostream>
+#include <chrono>
+#include <thread>
+
+void displayClock() {
+	while (true) {
+		//auto now = std::chrono::system_clock::now();
+		std::time_t timeNow = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		tm* localTime = std::localtime(&timeNow);
+
+		std::cout << "\r" << std::put_time(localTime, "%X") << std::flush;
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
+}
+
+int main() {
+
+	displayClock();
+
+	return 0;
+}
