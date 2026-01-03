@@ -1,0 +1,24 @@
+// Program divides integer number into single digits and prints them
+// e. g. 61843 --> 6 1 8 4 3
+
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+int divider(int& counter, int number) {
+	return (number / counter) % 10;
+}
+
+int main() {
+
+	int x = 61843;
+	int size = log10(x) + 1;		//Amount of digits in the number
+	int counter = 1;
+
+	for (int i = 0; i < size; ++i) {
+		cout << divider(counter, x) << " ";
+		counter *= 10;
+	}
+
+	return 0;
+}
