@@ -1,0 +1,9 @@
+Ground:
+path: "D://Programs/Visual Studio/VS_Projrcts/game_SFML/Resources/ground.png"
+positionX: 0 344
+repeater: 1
+#
+Castle:
+path: "D://Programs/Visual Studio/VS_Projrcts/game_SFML/Resources/castle.png"
+positionX: 200 -50
+repeater: 0

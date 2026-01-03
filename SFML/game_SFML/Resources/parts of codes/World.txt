@@ -1,0 +1,19 @@
+// World initialization
+// World---------------------------------------------------------
+// Background
+Texture bgTexture("D://Programs/Visual Studio/VS_Projrcts/game_SFML/Resources/background.jpg");
+Sprite bgSprite(bgTexture);
+
+// World objects
+std::string pathGround("D://Programs/Visual Studio/VS_Projrcts/game_SFML/Resources/ground.png");
+std::string pathCastle("D://Programs/Visual Studio/VS_Projrcts/game_SFML/Resources/castle.png");
+Vector2f groundPosition = { 0.f, 344.f };
+Vector2f castlePosition = { 200.f, -50.f };
+WorldObjectsStruct groundStruct{ pathGround, groundPosition, true };
+WorldObjects ground(groundStruct);
+WorldObjects castle({pathCastle, castlePosition, false});
+//------------------------------------------------------------------
+
+window.draw(bgSprite);
+window.draw(ground.getSprite());
+window.draw(castle.getSprite());

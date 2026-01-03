@@ -1,0 +1,24 @@
+Clock clck;
+float gravity = 0.01f;
+float posY = 0.f;
+
+
+// try gravity with ball
+CircleShape circle(20.f);
+circle.setFillColor(Color::Black);
+float clockInMilliSeconds = clck.getElapsedTime().asMilliseconds();
+posY = 0.5f * gravity * pow(clockInMilliSeconds, 2);
+circle.setPosition({ circle.getPosition().x, posY});
+
+if (circle.getPosition().y >= 300.0) {
+	posY = 0.f;
+	circle.setPosition({ circle.getPosition().x, 0.f });
+	clck.restart();
+	std::cout << "----------------------------------------" << std::endl;
+	std::cout << circle.getPosition().y << std::endl;
+}
+
+
+std::cout << circle.getPosition().x << "   " << circle.getPosition().y << std::endl;
+
+window.draw(circle);

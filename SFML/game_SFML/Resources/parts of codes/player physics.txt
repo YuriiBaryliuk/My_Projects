@@ -1,0 +1,33 @@
+//right under the main
+
+Clock clck;
+const int yGroundPoint = 344;
+const int jumpHeight = 50;
+const float g = 300.f;
+float startPosY = yGroundPoint - 25;
+float velocity = sqrt(2 * g * jumpHeight);
+bool startJump = false;
+
+//before main while loop
+RectangleShape player({ 20, 50 });
+
+player.setFillColor(Color::Magenta);
+player.setPosition({50, startPosY});
+bool isOnTheGround = true;
+
+//in event while loop
+if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) && !startJump){
+	clck.restart();
+	startJump = true;
+}
+
+//in main while loop before window.draw
+if (startJump) {
+	float elapsed = clck.getElapsedTime().asSeconds();
+	float posY = startPosY - (velocity * elapsed - 0.5f * g * elapsed * elapsed);
+	player.setPosition({ player.getPosition().x, posY });
+	if (player.getPosition().y >= yGroundPoint) {
+		startJump = false;
+		//player.setPosition({ player.getPosition().x, startPosY});
+	}
+}

@@ -1,0 +1,23 @@
+std::ifstream in("D://Programs/Visual Studio/VS_Projrcts/game_SFML/Resources/world_data.txt");
+if (!in) {
+	std::cerr << "Failed to load file";
+	exit(1);
+}
+
+while (in) {
+	std::string temp;
+	std::string path;
+	float positionX;
+	float positionY;
+	bool repeater;
+
+	in >> temp >> temp;
+	std::getline(in, path);
+	in >> temp >> positionX >> positionY;
+	in >> temp >> repeater;
+	in >> temp;
+
+	std::cout << "Path: " << path << "\n"
+		<< "Position XY: " << positionX << " " << positionY << "\n"
+		<< "Repeater: " << repeater << std::endl;
+}
