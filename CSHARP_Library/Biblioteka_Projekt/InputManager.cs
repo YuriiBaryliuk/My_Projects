@@ -9,6 +9,7 @@ namespace Biblioteka_Projekt
         public static void InputReader(ReaderManager rm)
         {
             string name, surname;
+            char gender;
             DateOnly dateOfBirth;
             Address address;
             string phoneNumber, email;
@@ -16,12 +17,13 @@ namespace Biblioteka_Projekt
             Console.WriteLine("Enter Reader's data below");
             name = singleInputInit("name", InputCheck.checkPersonName);
             surname = singleInputInit("surname", InputCheck.checkPersonSurame);
+            gender = singleInputInit("gender (m/f)", InputCheck.checkPersonGender)[0];
             dateOfBirth = inputReaderDate();
             address = inputReaderAddress();
             phoneNumber = singleInputInit("phone", InputCheck.checkPersonPhone);
             email = singleInputInit("email", InputCheck.checkPersonEmail);
 
-            Reader r = new Reader(name, surname, dateOfBirth, address, phoneNumber, email, DateTime.Now);
+            Reader r = new Reader(name, surname, gender, dateOfBirth, address, phoneNumber, email, DateTime.Now);
             rm.addToReadersRegister(r);
             rm.loadReaderToFile(r);
         }

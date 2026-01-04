@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -30,11 +31,21 @@ namespace Biblioteka_Projekt
                 return true;
             return false;
         }
+
+        public static bool checkPersonGender(string gender)
+        {
+            if (char.TryParse(gender, out char result))
+                if (char.ToLower(result) == 'm' || char.ToLower(result) == 'f')
+                    return true;
+            return false;
+        }
         public static bool checkDate(string year, string month = "01", string day = "01")
         {
-            string fullDate = year + "-" + month + "-" + day;
-            if (DateOnly.TryParse(fullDate, out DateOnly res))
-                if (res <= DateOnly.FromDateTime(DateTime.Now))
+            day = day.Length == 1 ? "0" + day : day;
+            month = month.Length == 1 ? "0" + month : month;
+            string fullDate = day + "-" + month + "-" + year;
+            if (DateOnly.TryParseExact(fullDate, "dd-MM-yyyy", out DateOnly result))
+                if (result <= DateOnly.FromDateTime(DateTime.Now))
                     return true;
             return false;
         }

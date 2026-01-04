@@ -9,8 +9,8 @@ namespace Biblioteka_Projekt
         public int m_ID { get; private set; }
         public DateTime m_dateOfRegistration{ get; private set; }
 
-        public Reader(string name, string surname, DateOnly dateOfBirth, Address address, string phoneNumber, string email, DateTime dateOfRegistration) :
-            base(name, surname, dateOfBirth, address, phoneNumber, email)
+        public Reader(string name, string surname, char gender, DateOnly dateOfBirth, Address address, string phoneNumber, string email, DateTime dateOfRegistration) :
+            base(name, surname, gender, dateOfBirth, address, phoneNumber, email)
         {
             m_dateOfRegistration = dateOfRegistration;
             m_ID = nextID++;
@@ -18,7 +18,8 @@ namespace Biblioteka_Projekt
 
         public override void printData()
         {
-            Console.WriteLine($"ID: {m_ID}\nName: {m_name}\nSurname: {m_surname}\nAge: {m_age}\n" +
+            Console.WriteLine($"ID: {m_ID}\nName: {m_name}\nSurname: {m_surname}\n" +
+                $"Gender: {m_gender}\nAge: {m_age}\n" +
                 $"Address: {m_address.printAddress()}\n" +
                 $"Phone number: {m_phoneNumber}\n" +
                 $"Email address: {m_email}\n" +

@@ -7,16 +7,18 @@ namespace Biblioteka_Projekt
     {
         public string m_name { get; private set; }
         public string m_surname { get; private set; }
+        public char m_gender { get; private set; }
         public DateOnly m_dateOfBirth { get; private set; }
         public int m_age{ get; private set; }
         public Address m_address{ get; private set; }
         public string m_phoneNumber{ get; private set; }
         public string m_email{ get; private set; }
 
-        public Person(string name, string surname, DateOnly dateOfBirth, Address address, string phoneNumber, string email)
+        public Person(string name, string surname, char gender, DateOnly dateOfBirth, Address address, string phoneNumber, string email)
         {
             m_name = name;
             m_surname = surname;
+            m_gender = gender;
             m_dateOfBirth = dateOfBirth;
             m_age = calculateAge();
             m_address = address;
@@ -34,7 +36,8 @@ namespace Biblioteka_Projekt
 
         public virtual void printData()
         {
-            Console.WriteLine($"Name: {m_name}\nSurname: {m_surname}\nAge: {m_age}\n" +
+            Console.WriteLine($"Name: {m_name}\nSurname: {m_surname}\n" +
+                $"Gender: {m_gender}\nAge: {m_age}\n" +
                 $"Address: {m_address.printAddress()}\n" +
                 $"Phone number: {m_phoneNumber}\n" +
                 $"Email Address: {m_email}");

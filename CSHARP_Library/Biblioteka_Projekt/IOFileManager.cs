@@ -30,12 +30,14 @@ namespace Biblioteka_Projekt
                         while(i < lineArrLen)
                         {
                             string name, surname, phone, email;
+                            char gender;
                             DateOnly dateOfBirth;
                             Address address;
                             DateTime dateOfRegistration;
 
                             name = dropEntityKeys(lineArray[i++]);
                             surname = dropEntityKeys(lineArray[i++]);
+                            gender = dropEntityKeys(lineArray[i++])[0];
                             dateOfBirth = DateOnly.Parse(dropEntityKeys(lineArray[i++]));
                             address = Address.toAddress(dropEntityKeys(lineArray[i++]));
                             phone = dropEntityKeys(lineArray[i++]);
@@ -43,7 +45,7 @@ namespace Biblioteka_Projekt
                             dateOfRegistration = DateTime.Parse(dropEntityKeys(lineArray[i++]));
                             ++i;
 
-                            Reader newR = new Reader(name, surname, dateOfBirth, address, phone, email, dateOfRegistration);
+                            Reader newR = new Reader(name, surname, gender, dateOfBirth, address, phone, email, dateOfRegistration);
                             tempReaderRegister.Add(newR);
                         }
                         return tempReaderRegister;
@@ -68,6 +70,7 @@ namespace Biblioteka_Projekt
             tempStr += "ID: " + reader.m_ID + "\n";
             tempStr += "Name: " + MyReformatting.firstLetterToUpper(reader.m_name) + "\n";
             tempStr += "Surname: " + MyReformatting.firstLetterToUpper(reader.m_surname) + "\n";
+            tempStr += "Gender: " + char.ToUpper(reader.m_gender);
             tempStr += "Date Of Birth: " + reader.m_dateOfBirth.ToString("yyyy-MM-dd") + "\n";
             tempStr += "Address: " + reader.m_address.ToString() + "\n";
             tempStr += "Phone Number: " + MyReformatting.toPhoneNumberPL(reader.m_phoneNumber) + "\n";
