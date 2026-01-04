@@ -93,7 +93,7 @@ namespace Biblioteka_Projekt
        
         private static Address inputReaderAddress()
         {
-            string? streetName, houseNumber, flatNumber;
+            string? streetName, houseNumber, flatNumber, city;
             while (true)
             {
                 Console.WriteLine("Write an address below");
@@ -103,8 +103,10 @@ namespace Biblioteka_Projekt
                 houseNumber = Console.ReadLine();
                 Console.Write("Flat Number: ");
                 flatNumber = Console.ReadLine();
+                Console.Write("City:");
+                city = Console.ReadLine();
 
-                if (string.IsNullOrEmpty(streetName) || string.IsNullOrEmpty(houseNumber) || string.IsNullOrEmpty(flatNumber))
+                if (string.IsNullOrEmpty(streetName) || string.IsNullOrEmpty(houseNumber) || string.IsNullOrEmpty(flatNumber) || string.IsNullOrEmpty(city))
                 {
                     Logs.writeLog("Entered Reader's address is empty or null");
                     Console.WriteLine("Entered address is not valid, try again");
@@ -119,7 +121,7 @@ namespace Biblioteka_Projekt
                 else
                     break;
             }
-            return new Address(streetName, houseNumber, flatNumber);
+            return new Address(city, streetName, houseNumber, flatNumber);
         }
 
         //-----------------Books-----------------//

@@ -4,8 +4,8 @@ internal class Program
     private static void Main(string[] args)
     {
         ReaderManager rm = new ReaderManager();
-        rm.printReadersRegister();
 
+        rm.printReadersRegister();
         rm.inputReader();
         rm.printReadersRegister();
         //BookManager bm = new BookManager();
