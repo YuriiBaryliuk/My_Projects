@@ -100,18 +100,19 @@ namespace Biblioteka_Projekt
                     try{
                         List<Book> tempBookRegister = new List<Book>();
                         int i = 1;
-                        while(i < lineArrLen)   //? rozny cykl
+                        while(i < lineArrLen)
                         {
-                            string author, title, genre;
-                            int yearOfRelease;
+                            string author, title, description;
+                            int yearOfRelease, genre;
 
                             author = dropEntityKeys(lineArray[i++]);
                             title = dropEntityKeys(lineArray[i++]);
                             yearOfRelease = Convert.ToInt32(dropEntityKeys(lineArray[i++]));
-                            genre = dropEntityKeys(lineArray[i++]);
+                            genre = Convert.ToInt32(dropEntityKeys(lineArray[i++]));
+                            description = dropEntityKeys(lineArray[i++]);
                             ++i;
 
-                            Book newB = new Book(author, title, yearOfRelease, genre);
+                            Book newB = new Book(author, title, yearOfRelease, genre, description);
                             tempBookRegister.Add(newB);
                         }
                         return tempBookRegister;
@@ -132,7 +133,8 @@ namespace Biblioteka_Projekt
             tempStr += "Author: " + MyReformatting.firstLetterToUpper(book.m_author) + "\n";
             tempStr += "Title: " + MyReformatting.firstLetterToUpper(book.m_title) + "\n";
             tempStr += "Date Of Release: " + book.m_yearOfRelease.ToString() + "\n";
-            tempStr += "Genre: " + MyReformatting.firstLetterToUpper(book.m_genre) + "\n";
+            tempStr += "GenreID: " + book.m_genreID.ToString() + "\n";
+            tempStr += "Description: " + MyReformatting.firstLetterToUpper(book.m_description) + "\n";
 
             File.AppendAllText(path, tempStr);
         }

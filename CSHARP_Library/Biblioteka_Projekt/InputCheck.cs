@@ -75,6 +75,14 @@ namespace Biblioteka_Projekt
             return false;
         }
 
+        public static bool checkBookGenre(string genreID)
+        {
+            if (int.TryParse(genreID, out int result))
+                if (result > 0 && result <= MyConstants.numberOfGenres)
+                    return true;
+            return false;
+        }
+
         //private static void capitalizeFirstLetter(ref string param)
         //{
         //    param = char.ToUpper(param[0]) + param.Substring(1);

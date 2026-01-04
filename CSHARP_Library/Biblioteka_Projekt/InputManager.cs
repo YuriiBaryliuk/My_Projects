@@ -127,16 +127,22 @@ namespace Biblioteka_Projekt
         //-----------------Books-----------------//
         public static void InputBook(BookManager bm)
         {
-            string author, title, genre;
-            int yearOfRelease;
+            string author, title;
+            int yearOfRelease, genreID;
+            string? description;
 
             Console.WriteLine("Enter Book's data below");
             author = singleInputInit("author", InputCheck.checkAuthorName);
             title = initAndCheckIfNull("title");
             yearOfRelease = initBookYear();
-            genre = initAndCheckIfNull("genre");
-
-            Book b = new Book(author, title, yearOfRelease, genre);
+            genreID = initGenre();
+            Console.Write("Enter description: ");
+            description = Console.ReadLine();
+            Book b;
+            if(string.IsNullOrEmpty(description))
+                b = new Book(author, title, yearOfRelease, genreID);
+            else
+                b = new Book(author, title, yearOfRelease, genreID, description);
             bm.addToBooksRegister(b);
             bm.loadBookToFile(b);
         }
@@ -159,89 +165,22 @@ namespace Biblioteka_Projekt
             return Convert.ToInt32(bookYear);
         }
 
-        //private static string inputReaderName()
-        //{
-        //    string? name;
-        //    while (true)
-        //    {
-        //        Console.Write("Enter a name: ");
-        //        name = Console.ReadLine();
+        private static int initGenre()
+        {
+            string genreID;
+            const string parameterName = "Genre ID";
+            while(true){
+            genreID = initAndCheckIfNull(parameterName);
 
-        //        if (string.IsNullOrEmpty(name))
-        //        {
-        //            Logs.writeLog("Entered Reader's name is empty or null");
-        //            Console.WriteLine("Entered name is not valid, try again");
-        //            continue;
-        //        }
-        //        else if(!InputCheck.checkPersonName(name)){
-        //            Logs.writeLog("Entered Reader's name is not compatible with regular expression");
-        //            Console.WriteLine("Entered name is not valid, try again");
-        //            continue;
-        //        }
-        //        else
-        //            break;
-        //    }
-        //    return name;
-        //}
-
-        //private static string inputReaderSurname()
-        //{
-        //    string? surname;
-        //    while (true)
-        //    {
-        //        Console.Write("Enter a surname: ");
-        //        surname = Console.ReadLine();
-
-        //        if (string.IsNullOrEmpty(surname))
-        //        {
-        //            Logs.writeLog("Entered Reader's surname is empty or null");
-        //            Console.WriteLine("Entered surname is not valid, try again");
-        //            continue;
-        //        }
-        //        else if(!InputCheck.checkPersonName(surname)){
-        //            Logs.writeLog("Entered Reader's surname is not compatible with regular expression");
-        //            Console.WriteLine("Entered surname is not valid, try again");
-        //            continue;
-        //        }
-        //        else
-        //            break;
-        //    }
-        //    return surname;
-        //}
-        
-        //private static string inputReaderPhone()
-        //{
-        //    string? phone;
-        //    while (true)
-        //    {
-        //        Console.Write("Enter a phone: ");
-        //        phone = Console.ReadLine();
-
-        //        if (string.IsNullOrEmpty(phone))
-        //        {
-        //            Logs.writeLog("Entered Reader's phone is empty or null");
-        //            Console.WriteLine("Entered phone is not valid, try again");
-        //            continue;
-        //        }
-        //        else if(!InputCheck.checkPersonPhone(phone)){
-        //            Logs.writeLog("Entered Reader's phone is not compatible with regular expression");
-        //            Console.WriteLine("Entered phone is not valid, try again");
-        //            continue;
-        //        }
-        //        else
-        //            break;
-        //    }
-        //    return phone;
-        //}
-
-        //private static bool checkForNull(string userInput)
-        //{
-        //    if (string.IsNullOrEmpty(userInput))
-        //    {
-        //        Console.WriteLine("Input is null or empty");
-        //        return false;
-        //    }
-        //    return true;
-        //}
+                if(!InputCheck.checkBookGenre(genreID))
+                {
+                    Logs.writeLog($"Entered item: \"{parameterName}\" is not compatible with regular expression");
+                    Console.WriteLine($"Entered {parameterName} is not valid, try again");
+                    continue;
+                }
+                break;
+            }
+            return Convert.ToInt32(genreID);
+        }
     }
 }

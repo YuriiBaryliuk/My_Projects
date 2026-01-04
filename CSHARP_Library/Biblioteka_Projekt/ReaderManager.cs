@@ -16,21 +16,27 @@ namespace Biblioteka_Projekt
         }
 
         public void addToReadersRegister(Reader reader) => readersRegister.Add(reader);
-        public Reader? getLastReader()
-        {
-            if (readersRegister.Count != 0)
-                return readersRegister.ElementAt(readersRegister.Count - 1);
-            else{
-                Logs.writeLog("Trying to get last element from Readers register. Readers register is empty.");
-                Console.WriteLine("Readers register is empty");
-                return null;
-            }
-        }
+        //public Reader? getLastReader()
+        //{
+        //    if (readersRegister.Count != 0)
+        //        return readersRegister.ElementAt(readersRegister.Count - 1);
+        //    else{
+        //        Logs.writeLog("Trying to get last element from Readers register. Readers register is empty.");
+        //        Console.WriteLine("Readers register is empty");
+        //        return null;
+        //    }
+        //}
 
         public void printReadersRegister()
         {
-            foreach (Reader i in readersRegister)
-                i.printData();
+            if (readersRegister.Count != 0)
+                foreach (Reader i in readersRegister)
+                    i.printData();
+            else
+            {
+                Logs.writeLog("Trying to get elements from Readers register. Readers register is empty.");
+                Console.WriteLine("Readers register is empty");
+            }
         }
 
         public void inputReader()
