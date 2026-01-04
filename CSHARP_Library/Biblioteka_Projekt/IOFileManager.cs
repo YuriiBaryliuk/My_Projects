@@ -29,7 +29,7 @@ namespace Biblioteka_Projekt
                         int i = 1;
                         while(i < lineArrLen)
                         {
-                            string name, surname, phone;
+                            string name, surname, phone, email;
                             DateOnly dateOfBirth;
                             Address address;
                             DateTime dateOfRegistration;
@@ -39,10 +39,11 @@ namespace Biblioteka_Projekt
                             dateOfBirth = DateOnly.Parse(dropEntityKeys(lineArray[i++]));
                             address = Address.toAddress(dropEntityKeys(lineArray[i++]));
                             phone = dropEntityKeys(lineArray[i++]);
+                            email = dropEntityKeys(lineArray[i++]);
                             dateOfRegistration = DateTime.Parse(dropEntityKeys(lineArray[i++]));
                             ++i;
 
-                            Reader newR = new Reader(name, surname, dateOfBirth, address, phone, dateOfRegistration);
+                            Reader newR = new Reader(name, surname, dateOfBirth, address, phone, email, dateOfRegistration);
                             tempReaderRegister.Add(newR);
                         }
                         return tempReaderRegister;
@@ -70,6 +71,7 @@ namespace Biblioteka_Projekt
             tempStr += "Date Of Birth: " + reader.m_dateOfBirth.ToString("yyyy-MM-dd") + "\n";
             tempStr += "Address: " + reader.m_address.ToString() + "\n";
             tempStr += "Phone Number: " + MyReformatting.toPhoneNumberPL(reader.m_phoneNumber) + "\n";
+            tempStr += "Email Address: " + reader.m_email + "\n";
             tempStr += "Date Of Registration: " + reader.m_dateOfRegistration.ToString() + "\n";
 
             File.AppendAllText(path, tempStr);

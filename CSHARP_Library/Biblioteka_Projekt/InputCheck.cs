@@ -2,8 +2,6 @@
 using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Biblioteka_Projekt
 {
@@ -14,8 +12,9 @@ namespace Biblioteka_Projekt
         const string regexStreetNamePattern = @"^[A-Za-z0-9ĆŁŚŻąćęłńóśżź\s,.\-/]{2,100}$";
         const string regexHouseFlatPattern = @"^[A-Za-z0-9ĆŁŚŻąćęłńóśżź]{1,10}$";
         const string regexPhonePattern = @"^\d{9}$";
-        const string regexAuthorPattern = @"^[A-za-z0-9\s,.\-/&]{2,100}$";
+        const string regexAuthorPattern = @"^[A-Za-z0-9\s,.\-/&]{2,100}$";
         const string regexReleaseYearPattern = @"^\d{1,4}$";
+        const string regexEmailPattern = @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$";
 
         public static bool checkPersonName(string name)
         {
@@ -50,6 +49,13 @@ namespace Biblioteka_Projekt
         public static bool checkPersonPhone(string phone)
         {
             if(Regex.IsMatch(phone, regexPhonePattern))
+                return true;
+            return false;
+        }
+
+        public static bool checkPersonEmail(string email)
+        {
+            if (Regex.IsMatch(email, regexEmailPattern))
                 return true;
             return false;
         }

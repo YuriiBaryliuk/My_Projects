@@ -11,7 +11,7 @@ namespace Biblioteka_Projekt
             string name, surname;
             DateOnly dateOfBirth;
             Address address;
-            string phoneNumber;
+            string phoneNumber, email;
 
             Console.WriteLine("Enter Reader's data below");
             name = singleInputInit("name", InputCheck.checkPersonName);
@@ -19,8 +19,9 @@ namespace Biblioteka_Projekt
             dateOfBirth = inputReaderDate();
             address = inputReaderAddress();
             phoneNumber = singleInputInit("phone", InputCheck.checkPersonPhone);
+            email = singleInputInit("email", InputCheck.checkPersonEmail);
 
-            Reader r = new Reader(name, surname, dateOfBirth, address, phoneNumber, DateTime.Now);
+            Reader r = new Reader(name, surname, dateOfBirth, address, phoneNumber, email, DateTime.Now);
             rm.addToReadersRegister(r);
             rm.loadReaderToFile(r);
         }
@@ -89,8 +90,7 @@ namespace Biblioteka_Projekt
             }
             return new DateOnly(Convert.ToInt16(year), Convert.ToInt16(month), Convert.ToInt16(day));
         }
-        
-        //?Czy podzielic
+       
         private static Address inputReaderAddress()
         {
             string? streetName, houseNumber, flatNumber;

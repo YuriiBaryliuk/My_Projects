@@ -11,8 +11,9 @@ namespace Biblioteka_Projekt
         public int m_age{ get; private set; }
         public Address m_address{ get; private set; }
         public string m_phoneNumber{ get; private set; }
+        public string m_email{ get; private set; }
 
-        public Person(string name, string surname, DateOnly dateOfBirth, Address address, string phoneNumber)
+        public Person(string name, string surname, DateOnly dateOfBirth, Address address, string phoneNumber, string email)
         {
             m_name = name;
             m_surname = surname;
@@ -20,6 +21,7 @@ namespace Biblioteka_Projekt
             m_age = calculateAge();
             m_address = address;
             m_phoneNumber = phoneNumber;
+            m_email = email;
         }
 
         private int calculateAge()
@@ -34,7 +36,8 @@ namespace Biblioteka_Projekt
         {
             Console.WriteLine($"Name: {m_name}\nSurname: {m_surname}\nAge: {m_age}\n" +
                 $"Address: {m_address.printAddress()}\n" +
-                $"Phone number: {m_phoneNumber}\n");
+                $"Phone number: {m_phoneNumber}\n" +
+                $"Email Address: {m_email}");
         }
     }
 }
