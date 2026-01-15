@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text;
 
 namespace Biblioteka_Projekt
@@ -146,6 +148,38 @@ namespace Biblioteka_Projekt
             string[] keyAndValue = line.Split(":", 2);
             string value = keyAndValue[1].Substring(1);
             return value;
+        }
+
+        //-------------SQL------------//
+
+        public static bool readCommand(string fileName, ref string command)
+        {
+            bool noException = true;
+            //string path = AppDomain.CurrentDomain.BaseDirectory + fileName;
+            //var assembly = Assembly.GetEntryAssembly();
+            //string path = 
+            //if (!File.Exists(path))
+            //{
+            //    Logs.writeLog($"File {fileName} doesn't exists");
+            //    Console.WriteLine("Can't read from " + fileName);
+            //    noException = false;
+            //}
+            //else
+            //{
+                try{
+                //using (var reader = File.OpenText(path))
+                //{
+                var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("CheckTables");
+                StreamReader reader = new StreamReader(stream);
+                command = reader.ReadToEnd();
+                    //}
+                }catch(Exception ex)
+                {
+                    Logs.writeLog($"Can't read from {fileName}: {ex.Message}");
+                    noException = false;
+                }
+            //}
+            return noException;
         }
     }
 }
