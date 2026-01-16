@@ -9,7 +9,7 @@ namespace Biblioteka_Projekt
         public int m_ID { get; private set; }
         public DateTime m_dateOfRegistration{ get; private set; }
 
-        public Reader(string name, string surname, char gender, DateOnly dateOfBirth, Address address, string phoneNumber, string email, DateTime dateOfRegistration) :
+        public Reader(string name, string surname, char gender, DateTime dateOfBirth, Address address, string phoneNumber, string email, DateTime dateOfRegistration) :
             base(name, surname, gender, dateOfBirth, address, phoneNumber, email)
         {
             m_dateOfRegistration = dateOfRegistration;

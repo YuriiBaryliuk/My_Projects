@@ -6,11 +6,11 @@ namespace Biblioteka_Projekt
     internal class InputManager
     {
         //-----------------Readers-----------------//
-        public static void InputReader(ReaderManager rm)
+        public static Reader InputReader()
         {
             string name, surname;
             char gender;
-            DateOnly dateOfBirth;
+            DateTime dateOfBirth;
             Address address;
             string phoneNumber, email;
 
@@ -23,9 +23,7 @@ namespace Biblioteka_Projekt
             phoneNumber = singleInputInit("phone", InputCheck.checkPersonPhone);
             email = singleInputInit("email", InputCheck.checkPersonEmail);
 
-            Reader r = new Reader(name, surname, gender, dateOfBirth, address, phoneNumber, email, DateTime.Now);
-            rm.addToReadersRegister(r);
-            rm.loadReaderToFile(r);
+            return new Reader(name, surname, gender, dateOfBirth, address, phoneNumber, email, DateTime.Now);
         }
         private static string singleInputInit(string parameterName, Predicate<string> initValue)
         {
@@ -62,7 +60,7 @@ namespace Biblioteka_Projekt
             return param;
         }
 
-        private static DateOnly inputReaderDate()
+        private static DateTime inputReaderDate()
         {
             string? day, month, year;
             while (true)
@@ -90,7 +88,7 @@ namespace Biblioteka_Projekt
                 else
                     break;
             }
-            return new DateOnly(Convert.ToInt16(year), Convert.ToInt16(month), Convert.ToInt16(day));
+            return new DateTime(Convert.ToInt16(year), Convert.ToInt16(month), Convert.ToInt16(day));
         }
        
         private static Address inputReaderAddress()
@@ -127,7 +125,7 @@ namespace Biblioteka_Projekt
         }
 
         //-----------------Books-----------------//
-        public static void InputBook(BookManager bm)
+        public static Book InputBook()
         {
             string author, title;
             int yearOfRelease, genreID;
@@ -142,11 +140,9 @@ namespace Biblioteka_Projekt
             description = Console.ReadLine();
             Book b;
             if(string.IsNullOrEmpty(description))
-                b = new Book(author, title, yearOfRelease, genreID);
+                return new Book(author, title, yearOfRelease, genreID);
             else
-                b = new Book(author, title, yearOfRelease, genreID, description);
-            bm.addToBooksRegister(b);
-            bm.loadBookToFile(b);
+                return new Book(author, title, yearOfRelease, genreID, description);
         }
 
         private static int initBookYear()

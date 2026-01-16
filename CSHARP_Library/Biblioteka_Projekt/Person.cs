@@ -8,13 +8,13 @@ namespace Biblioteka_Projekt
         public string m_name { get; private set; }
         public string m_surname { get; private set; }
         public char m_gender { get; private set; }
-        public DateOnly m_dateOfBirth { get; private set; }
+        public DateTime m_dateOfBirth { get; private set; }
         public int m_age{ get; private set; }
         public Address m_address{ get; private set; }
         public string m_phoneNumber{ get; private set; }
         public string m_email{ get; private set; }
 
-        public Person(string name, string surname, char gender, DateOnly dateOfBirth, Address address, string phoneNumber, string email)
+        public Person(string name, string surname, char gender, DateTime dateOfBirth, Address address, string phoneNumber, string email)
         {
             m_name = name;
             m_surname = surname;
@@ -28,7 +28,7 @@ namespace Biblioteka_Projekt
 
         private int calculateAge()
         {
-            DateOnly tempDate = new DateOnly(m_dateOfBirth.Year, DateTime.Now.Month, DateTime.Now.Day);
+            DateTime tempDate = new DateTime(m_dateOfBirth.Year, DateTime.Now.Month, DateTime.Now.Day);
             if (m_dateOfBirth <= tempDate)
                 return DateTime.Now.Year - m_dateOfBirth.Year;
             return DateTime.Now.Year - m_dateOfBirth.Year - 1;

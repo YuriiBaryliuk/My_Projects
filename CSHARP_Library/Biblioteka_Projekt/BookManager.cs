@@ -1,30 +1,15 @@
 ﻿namespace Biblioteka_Projekt
 {
-    internal class BookManager
+    internal class BookManager : ManagerBase<Book>
     {
-        List<Book> booksRegister;
-        public string books_db_path{ get; private set; }
-        public BookManager()
+        public BookManager() : base(MyConstants.file_BooksDB)
         {
-            string root = AppDomain.CurrentDomain.BaseDirectory;
-            books_db_path = Path.Combine(root, "Books_DB.txt");
-            booksRegister = IOFileManager.initBookRegFromFileDB(books_db_path);
+            register = IOFileManager.initBookRegFromFileDB(pathToDB);
         }
-        public void addToBooksRegister(Book book) => booksRegister.Add(book);
-        //public Book? getLastBook()
-        //{
-        //    if (booksRegister.Count != 0)
-        //        return booksRegister.ElementAt(booksRegister.Count - 1);
-        //    else{
-        //        Logs.writeLog("Trying to get last element from Books register. Books register is empty.");  //?
-        //        Console.WriteLine("Books register is empty");
-        //        return null;
-        //    }
-        //}
-        public void printBooksRegister()
+        public override void printRegister()
         {
-            if (booksRegister.Count != 0)
-                foreach (Book i in booksRegister)
+            if (register.Count != 0)
+                foreach (Book i in register)
                     i.printData();
             else
             {
@@ -32,13 +17,23 @@
                 Console.WriteLine("Books register is empty");
             }
         }
-        public void inputBook()
+        public override Book getLastMember()
         {
-            InputManager.InputBook(this);
+            if (register.Count != 0)
+                return register.Last();
+            return null;
         }
-        public void loadBookToFile(Book book)
+
+        public override void inputAndSave<Book>()
         {
-            IOFileManager.writeBookToFile(books_db_path, book);
+            try{
+            addToRegister(InputManager.InputBook());
+            IOFileManager.writeBookToFile(pathToDB, getLastMember());
+            }catch(Exception e)
+            {
+                Logs.writeLog(e.Message);
+                Console.WriteLine("Can't write a book to Database");
+            }
         }
     }
 }

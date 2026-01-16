@@ -5,25 +5,30 @@ internal class Program
 {
     private static void Main(string[] args)
     {
+        
+        ReaderManager rm = new ReaderManager();
+        rm.printRegister();
+        rm.inputAndSave<Reader>();
+        rm.printRegister();
 
-        string connection = MyConstants.connectionToMaster;
-        SQLManager sqlManager = new SQLManager(connection);
+        //BookManager bm = new BookManager();
+        //bm.printRegister();
+        //bm.inputAndSave<Book>();
+        //bm.printRegister();
+
+
+
+
+        //foreach (var name in Assembly.GetExecutingAssembly().GetManifestResourceNames())
+        //    Console.WriteLine(name);
+
+       /*
+        SQLManager sqlManager = new SQLManager(MyConstants.connectionToMaster);
         if (sqlManager.getInitError())
             Console.WriteLine("Not Proper Initialization");
         else
             Console.WriteLine("Proper Initialization");
-        
-        //ReaderManager rm = new ReaderManager();
-        //rm.printReadersRegister();
-        //rm.inputReader();
-        //rm.printReadersRegister();
-        //BookManager bm = new BookManager();
-        //bm.printBooksRegister();
-        //bm.inputBook();
-        //bm.printBooksRegister();
-
-        //foreach (var name in Assembly.GetExecutingAssembly().GetManifestResourceNames())
-        //    Console.WriteLine(name);
+        */
 
         /*
         using var man = Assembly.GetExecutingAssembly().GetManifestResourceStream("Biblioteka_Projekt.CheckTables.sql");

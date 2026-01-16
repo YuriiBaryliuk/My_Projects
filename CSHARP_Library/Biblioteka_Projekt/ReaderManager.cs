@@ -1,36 +1,15 @@
-﻿using System;
-using System.Text;
-using System.IO;
-
-namespace Biblioteka_Projekt
+﻿namespace Biblioteka_Projekt
 {
-    internal class ReaderManager
+    internal class ReaderManager : ManagerBase<Reader>
     {
-        List<Reader> readersRegister;
-        public string readers_db_path{ get; private set; }
-        public ReaderManager()
+        public ReaderManager() : base(MyConstants.file_ReaderDB)
         {
-            string root = AppDomain.CurrentDomain.BaseDirectory;
-            readers_db_path = Path.Combine(root, "Readers_DB.txt");
-            readersRegister = IOFileManager.initReaderRegFromFileDB(readers_db_path);
+            register = IOFileManager.initReaderRegFromFileDB(pathToDB);
         }
-
-        public void addToReadersRegister(Reader reader) => readersRegister.Add(reader);
-        //public Reader? getLastReader()
-        //{
-        //    if (readersRegister.Count != 0)
-        //        return readersRegister.ElementAt(readersRegister.Count - 1);
-        //    else{
-        //        Logs.writeLog("Trying to get last element from Readers register. Readers register is empty.");
-        //        Console.WriteLine("Readers register is empty");
-        //        return null;
-        //    }
-        //}
-
-        public void printReadersRegister()
+        public override void printRegister()
         {
-            if (readersRegister.Count != 0)
-                foreach (Reader i in readersRegister)
+            if (register.Count != 0)
+                foreach (Reader i in register)
                     i.printData();
             else
             {
@@ -39,14 +18,22 @@ namespace Biblioteka_Projekt
             }
         }
 
-        public void inputReader()
+        public override Reader getLastMember()
         {
-            InputManager.InputReader(this);
+            if (register.Count != 0)
+                return register.Last();
+            return null;
         }
-
-        public void loadReaderToFile(Reader reader)
+        public override void inputAndSave<Reader>()
         {
-            IOFileManager.writeReaderToFile(readers_db_path, reader);
+            try{
+            addToRegister(InputManager.InputReader());
+            IOFileManager.writeReaderToFile(pathToDB, getLastMember());
+            }catch(Exception e)
+            {
+                Logs.writeLog(e.Message);
+                Console.WriteLine("Can't write a reader to Database");
+            }
         }
     }
 }

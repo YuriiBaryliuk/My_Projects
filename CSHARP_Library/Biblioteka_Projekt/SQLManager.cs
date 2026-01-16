@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Biblioteka_Projekt
 {
-    internal class SQLManager
+    internal class SQLManager : IManager<Book>, IManager<Reader>
     {
         private string m_connection;
         private bool initError = false; // Database initialization error (true if Database was not initialized properly)
@@ -98,33 +98,13 @@ namespace Biblioteka_Projekt
             return myVariable;
             
         }
-        //private bool checkIfDBExists()
-        //{
-        //    bool isExists = false;
-        //    try
-        //    {
-        //    using (SqlConnection sqlConnect = new SqlConnection(this.m_connection)){
-        //        sqlConnect.Open();
-        //        string myCommand = @"select count(*) 
-        //                            from sys.databases
-        //                            where name = 'CSLibrary'";
 
-        //        using (SqlCommand sqlCommand = new SqlCommand(myCommand, sqlConnect))
-        //            isExists = Convert.ToBoolean(sqlCommand.ExecuteScalar());
-        //    }
-        //    }catch(SqlException ex){
-        //        Logs.writeLog("Can not check Database: " + ex.Message);
-        //        Console.WriteLine("Can not check Database");
-        //        this.initError = true;
-        //    }catch(Exception ex)
-        //    {
-        //        Logs.writeLog("Can not check Database: " + ex.Message);
-        //        Console.WriteLine("Can not check Database");
-        //        this.initError = true;
-        //    }
-        //    return isExists;
-        //}
-
-        
+        public void inputAndSave<T>()
+        {
+            if (typeof(T) == typeof(Reader))
+                Console.WriteLine("Reader");
+            else if (typeof(T) == typeof(Book))
+                Console.WriteLine("Book");
+        }
     }
 }
