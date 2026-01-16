@@ -16,7 +16,7 @@ INSERT Genre (Genre_id, GenreName) VALUES (14, 'Self-Help')
 INSERT Genre (Genre_id, GenreName) VALUES (15, 'True Crime')
 ALTER TABLE Genre CHECK CONSTRAINT ALL
 
-
+SET IDENTITY_INSERT Reader ON;
 ALTER TABLE Reader NOCHECK CONSTRAINT ALL
 insert into Reader (Reader_id, LastName, FirstName, Gender, BirthDate, "Address", City, Phone, Email, Registered) values (1, 'Aikman', 'Raffaello', 'M', '1980-01-14', 'Vista Street 204', 'Bibis', '+48 871 197 321', 'raikman0@purevolume.com', '2025-10-30 10:03:29');
 insert into Reader (Reader_id, LastName, FirstName, Gender, BirthDate, "Address", City, Phone, Email, Registered) values (2, 'Dykins', 'Shelly', 'F', '2003-06-24', 'Bath Way 3/25', 'Xiaoya', '+48 650 836 566', 'sdykins1@columbia.edu', '2025-11-13 12:11:48');
@@ -29,8 +29,9 @@ insert into Reader (Reader_id, LastName, FirstName, Gender, BirthDate, "Address"
 insert into Reader (Reader_id, LastName, FirstName, Gender, BirthDate, "Address", City, Phone, Email, Registered) values (9, 'Cruttenden', 'Nerty', 'F', '1999-07-14', 'Redwood Way 23/4', 'Ru-ye Sang', '+48 965 843 606', 'ncruttenden8@desdev.cn', '2025-05-31 16:32:38');
 insert into Reader (Reader_id, LastName, FirstName, Gender, BirthDate, "Address", City, Phone, Email, Registered) values (10, 'Blackborow', 'Ewell', 'M', '1985-05-30', 'Olive Lane 17', 'Jezerce', '+48 414 602 725', 'eblackborow9@washingtonpost.com', '2025-01-09 10:28:00');
 ALTER TABLE Reader CHECK CONSTRAINT ALL
+SET IDENTITY_INSERT Reader OFF;
 
-
+SET IDENTITY_INSERT Reader ON;
 ALTER TABLE Book NOCHECK CONSTRAINT ALL
 insert into Book (Book_id, Author, Title, YearOfRelease, Genre_id, "Description") values (1, 'Marabel Guinery', 'Slacker', 2000, 1, '-');
 insert into Book (Book_id, Author, Title, YearOfRelease, Genre_id, "Description") values (2, 'Renault Tellenbrok', 'Homeward Bound II: Lost in San Francisco', 1992, 14, '-');
@@ -43,14 +44,15 @@ insert into Book (Book_id, Author, Title, YearOfRelease, Genre_id, "Description"
 insert into Book (Book_id, Author, Title, YearOfRelease, Genre_id, "Description") values (9, 'Rochelle Glasgow', 'Wagons East', 1995, 15, '-');
 insert into Book (Book_id, Author, Title, YearOfRelease, Genre_id, "Description") values (10, 'Melloney Mordan', 'Christine', 2008, 10, '-');
 ALTER TABLE Book CHECK CONSTRAINT ALL
+SET IDENTITY_INSERT Reader OFF;
 
-
+SET IDENTITY_INSERT Reader ON;
 ALTER TABLE Staff NOCHECK CONSTRAINT ALL
 insert into Staff (Staff_id, LastName, FirstName, Title) values (1, 'McVeighty', 'Candide', 'Librarian');
 insert into Staff (Staff_id, LastName, FirstName, Title) values (2, 'Awde', 'Berna', 'Manager');
 insert into Staff (Staff_id, LastName, FirstName, Title) values (3, 'Abbate', 'Livvy', 'Librarian');
 ALTER TABLE Staff CHECK CONSTRAINT ALL
-
+SET IDENTITY_INSERT Reader OFF;
 
 ALTER TABLE Loans NOCHECK CONSTRAINT ALL
 insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (10, 1, 5, '2025-01-09 10:30:00', null);

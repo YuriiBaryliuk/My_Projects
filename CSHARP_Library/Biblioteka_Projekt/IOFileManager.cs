@@ -57,12 +57,12 @@
         {
             string tempStr = "";
             tempStr += "ID: " + reader.m_ID + "\n";
-            tempStr += "Name: " + MyReformatting.firstLetterToUpper(reader.m_name) + "\n";
-            tempStr += "Surname: " + MyReformatting.firstLetterToUpper(reader.m_surname) + "\n";
-            tempStr += "Gender: " + char.ToUpper(reader.m_gender) + "\n";
+            tempStr += "Name: " + reader.m_name + "\n";
+            tempStr += "Surname: " + reader.m_surname + "\n";
+            tempStr += "Gender: " + reader.m_gender + "\n";
             tempStr += "Date Of Birth: " + reader.m_dateOfBirth.ToString("yyyy-MM-dd") + "\n";
             tempStr += "Address: " + reader.m_address.ToString() + "\n";
-            tempStr += "Phone Number: " + MyReformatting.toPhoneNumberPL(reader.m_phoneNumber) + "\n";
+            tempStr += "Phone Number: " + reader.m_phoneNumber + "\n";
             tempStr += "Email Address: " + reader.m_email + "\n";
             tempStr += "Date Of Registration: " + reader.m_dateOfRegistration.ToString() + "\n";
 
@@ -114,11 +114,11 @@
         {
             string tempStr = "";
             tempStr += "ID: " + book.m_ID + "\n";
-            tempStr += "Author: " + MyReformatting.firstLetterToUpper(book.m_author) + "\n";
-            tempStr += "Title: " + MyReformatting.firstLetterToUpper(book.m_title) + "\n";
+            tempStr += "Author: " + book.m_author + "\n";
+            tempStr += "Title: " + book.m_title + "\n";
             tempStr += "Date Of Release: " + book.m_yearOfRelease.ToString() + "\n";
             tempStr += "GenreID: " + book.m_genreID.ToString() + "\n";
-            tempStr += "Description: " + MyReformatting.firstLetterToUpper(book.m_description) + "\n";
+            tempStr += "Description: " + book.m_description + "\n";
 
             File.AppendAllText(path, tempStr);
         }

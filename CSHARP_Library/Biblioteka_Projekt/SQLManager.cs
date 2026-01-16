@@ -58,13 +58,12 @@ namespace Biblioteka_Projekt
         {
             try
             {
-                using (SqlConnection sqlConnect = new SqlConnection(this.m_connection)){
+                using SqlConnection sqlConnect = new SqlConnection(this.m_connection);
                 sqlConnect.Open();
-
-                    using (SqlCommand sqlCommand = new SqlCommand(command, sqlConnect))
-                        sqlCommand.ExecuteNonQuery();
-            }
-            }catch(SqlException ex){
+                using SqlCommand sqlCommand = new SqlCommand(command, sqlConnect);
+                sqlCommand.ExecuteNonQuery();
+            }catch(SqlException ex)
+            {
                 Logs.writeLog(message + ": " + ex.Message);
                 Console.WriteLine(message);
                 return false;
@@ -81,12 +80,10 @@ namespace Biblioteka_Projekt
             T myVariable = default(T);
             try
             {
-                using (SqlConnection sqlConnect = new SqlConnection(this.m_connection)){
+                using SqlConnection sqlConnect = new SqlConnection(this.m_connection);
                 sqlConnect.Open();
-
-                    using (SqlCommand sqlCommand = new SqlCommand(command, sqlConnect))
-                        myVariable = (T)Convert.ChangeType(sqlCommand.ExecuteScalar(), typeof(T));
-            }
+                using SqlCommand sqlCommand = new SqlCommand(command, sqlConnect);
+                myVariable = (T)Convert.ChangeType(sqlCommand.ExecuteScalar(), typeof(T));
             }catch(SqlException ex){
                 Logs.writeLog(message + ": " + ex.Message);
                 Console.WriteLine(message);
@@ -102,9 +99,66 @@ namespace Biblioteka_Projekt
         public void inputAndSave<T>()
         {
             if (typeof(T) == typeof(Reader))
+            {
                 Console.WriteLine("Reader");
-            else if (typeof(T) == typeof(Book))
+                insertReader(InputManager.InputReader());
+            }
+            else if (typeof(T) == typeof(Book)){
                 Console.WriteLine("Book");
+                insertBook(InputManager.InputBook());
+            }
+        }
+
+        private void insertReader(Reader r, string message = "Can't insert a reader")
+        {
+            try{
+            using SqlConnection connection = new SqlConnection(m_connection);
+            using SqlCommand command = new SqlCommand(SQLCommandContainer.addReader(), connection);
+                connection.Open();
+                //command.Parameters.AddWithValue("@Reader_id", r.m_ID);
+                command.Parameters.AddWithValue("@LastName", r.m_surname);
+                command.Parameters.AddWithValue("@FirstName", r.m_name);
+                command.Parameters.AddWithValue("@Gender", r.m_gender);
+                command.Parameters.AddWithValue("@BirthDate", r.m_dateOfBirth);
+                command.Parameters.AddWithValue("@ReaderAddress", r.m_address.toSqlString());
+                command.Parameters.AddWithValue("@City", r.m_address.m_city);
+                command.Parameters.AddWithValue("@Phone", r.m_phoneNumber);
+                command.Parameters.AddWithValue("@Email", r.m_email);
+                command.Parameters.AddWithValue("@Registered", r.m_dateOfRegistration);
+
+                command.ExecuteNonQuery();
+            }catch(SqlException ex){
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }catch(Exception ex)
+            {
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }
+        }
+
+        private void insertBook(Book b, string message = "Can't insert a book")
+        {
+            try{
+            using SqlConnection connection = new SqlConnection(m_connection);
+            using SqlCommand command = new SqlCommand(SQLCommandContainer.addBook(), connection);
+                connection.Open();
+                //command.Parameters.AddWithValue("@Book_id", b.m_ID);
+                command.Parameters.AddWithValue("@Author", b.m_author);
+                command.Parameters.AddWithValue("@Title", b.m_title);
+                command.Parameters.AddWithValue("@YearOfRelease", b.m_yearOfRelease);
+                command.Parameters.AddWithValue("@Genre_id", b.m_genreID);
+                command.Parameters.AddWithValue("@BookDescription", b.m_description);
+
+                command.ExecuteNonQuery();
+            }catch(SqlException ex){
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }catch(Exception ex)
+            {
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }
         }
     }
 }

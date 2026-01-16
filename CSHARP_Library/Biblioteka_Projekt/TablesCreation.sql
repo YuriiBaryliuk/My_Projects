@@ -8,7 +8,7 @@
 )
 
 CREATE TABLE Reader (
-	Reader_id int NOT NULL,
+	Reader_id int IDENTITY (1, 1) NOT NULL,
 	LastName nvarchar (70) NOT NULL,
 	FirstName nvarchar (70) NOT NULL,
 	Gender char (1) NULL,
@@ -26,7 +26,7 @@ CREATE TABLE Reader (
 )
 
 CREATE TABLE Book(
-	Book_id int NOT NULL,
+	Book_id int IDENTITY (1, 1) NOT NULL,
 	Author nvarchar (254) NULL,
 	Title nvarchar (254) NULL,
 	YearOfRelease int NULL,
@@ -44,7 +44,7 @@ CREATE TABLE Book(
 )
 
 CREATE TABLE Staff(
-	Staff_id int NOT NULL,
+	Staff_id int IDENTITY (1, 1) NOT NULL,
 	LastName nvarchar (70) NOT NULL,
 	FirstName nvarchar (70) NOT NULL,
 	Title nvarchar (30) NULL,

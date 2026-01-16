@@ -15,12 +15,12 @@ namespace Biblioteka_Projekt
             string phoneNumber, email;
 
             Console.WriteLine("Enter Reader's data below");
-            name = singleInputInit("name", InputCheck.checkPersonName);
-            surname = singleInputInit("surname", InputCheck.checkPersonSurame);
-            gender = singleInputInit("gender (m/f)", InputCheck.checkPersonGender)[0];
+            name = MyReformatting.firstLetterToUpper(singleInputInit("name", InputCheck.checkPersonName));
+            surname = MyReformatting.firstLetterToUpper(singleInputInit("surname", InputCheck.checkPersonSurame));
+            gender = char.ToUpper(singleInputInit("gender (m/f)", InputCheck.checkPersonGender)[0]);
             dateOfBirth = inputReaderDate();
             address = inputReaderAddress();
-            phoneNumber = singleInputInit("phone", InputCheck.checkPersonPhone);
+            phoneNumber = MyReformatting.toPhoneNumberPL(singleInputInit("phone", InputCheck.checkPersonPhone));
             email = singleInputInit("email", InputCheck.checkPersonEmail);
 
             return new Reader(name, surname, gender, dateOfBirth, address, phoneNumber, email, DateTime.Now);
@@ -121,7 +121,7 @@ namespace Biblioteka_Projekt
                 else
                     break;
             }
-            return new Address(city, streetName, houseNumber, flatNumber);
+            return new Address(MyReformatting.firstLetterToUpper(city), MyReformatting.firstLetterToUpper(streetName), MyReformatting.firstLetterToUpper(houseNumber), MyReformatting.firstLetterToUpper(flatNumber));
         }
 
         //-----------------Books-----------------//
@@ -132,17 +132,18 @@ namespace Biblioteka_Projekt
             string? description;
 
             Console.WriteLine("Enter Book's data below");
-            author = singleInputInit("author", InputCheck.checkAuthorName);
-            title = initAndCheckIfNull("title");
+            author = MyReformatting.firstLetterToUpper(singleInputInit("author", InputCheck.checkAuthorName));
+            title = MyReformatting.firstLetterToUpper(initAndCheckIfNull("title"));
             yearOfRelease = initBookYear();
             genreID = initGenre();
             Console.Write("Enter description: ");
             description = Console.ReadLine();
-            Book b;
             if(string.IsNullOrEmpty(description))
                 return new Book(author, title, yearOfRelease, genreID);
-            else
+            else{
+                MyReformatting.firstLetterToUpper(description);
                 return new Book(author, title, yearOfRelease, genreID, description);
+            }
         }
 
         private static int initBookYear()

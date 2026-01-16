@@ -8,6 +8,5 @@ namespace Biblioteka_Projekt
             char.ToUpper(origin[0]) + origin[1..];
         public static string toPhoneNumberPL(string phone) =>
             "+48 " + phone[..3] + " " + phone.Substring(3, 3) + " " + phone[6..];
-        
     }
 }

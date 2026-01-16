@@ -19,10 +19,17 @@
 
         public override string ToString()
         {
-            return MyReformatting.firstLetterToUpper(m_streetName) + ", " + 
-                MyReformatting.firstLetterToUpper(m_houseNumber) + ", " + 
-                MyReformatting.firstLetterToUpper(m_flatNumber) + ", " + 
-                MyReformatting.firstLetterToUpper(m_city);
+            return m_streetName + ", " + 
+                m_houseNumber + ", " + 
+                m_flatNumber + ", " + 
+                m_city;
+        }
+
+        public string toSqlString()
+        {
+            return m_streetName + ", " +
+                m_houseNumber + ", " +
+                m_flatNumber;
         }
 
         public static Address toAddress(string str)
