@@ -120,4 +120,10 @@
   <data name="CheckTables" xml:space="preserve">
     <value />
   </data>
+  <data name="TablesCreation" xml:space="preserve">
+    <value />
+  </data>
+  <data name="TablesInsertion" xml:space="preserve">
+    <value />
+  </data>
 </root>

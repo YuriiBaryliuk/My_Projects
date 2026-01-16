@@ -152,33 +152,19 @@ namespace Biblioteka_Projekt
 
         //-------------SQL------------//
 
-        public static bool readCommand(string fileName, ref string command)
+        public static bool readCommand(string fullResourceName, ref string command)
         {
             bool noException = true;
-            //string path = AppDomain.CurrentDomain.BaseDirectory + fileName;
-            //var assembly = Assembly.GetEntryAssembly();
-            //string path = 
-            //if (!File.Exists(path))
-            //{
-            //    Logs.writeLog($"File {fileName} doesn't exists");
-            //    Console.WriteLine("Can't read from " + fileName);
-            //    noException = false;
-            //}
-            //else
-            //{
+            
                 try{
-                //using (var reader = File.OpenText(path))
-                //{
-                var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("CheckTables");
+                var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(fullResourceName);
                 StreamReader reader = new StreamReader(stream);
                 command = reader.ReadToEnd();
-                    //}
                 }catch(Exception ex)
                 {
-                    Logs.writeLog($"Can't read from {fileName}: {ex.Message}");
+                    Logs.writeLog($"Can't read {fullResourceName}: {ex.Message}");
                     noException = false;
                 }
-            //}
             return noException;
         }
     }

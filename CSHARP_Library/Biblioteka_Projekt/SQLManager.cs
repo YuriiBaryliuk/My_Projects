@@ -6,44 +6,55 @@ namespace Biblioteka_Projekt
     internal class SQLManager
     {
         private string m_connection;
-        private bool initError = false;
+        private bool initError = false; // Database initialization error (true if Database was not initialized properly)
         public bool getInitError() { return initError; }
         public SQLManager(string connection)
         {
             m_connection = connection;
-            if(!checkDatabaseExist())
+            if (!checkDatabaseExist())
+            {
                 initSQL();
-            initError = checkTablesExist();
+            }
+            else{
+                m_connection = MyConstants.connectionToCSLibrary;
+            }
+            initError = !checkTablesExist();    // Checking tables existion
         }
 
-        private void initSQL()
+        private void initSQL()  // Database and Tables creation and initialization
         {
-            const string fileName = "CSLibrary_Create.sql";
-            string command = "";
-            if(IOFileManager.readCommand(fileName, ref command))
-                initError = executeQuaery(command, "Can't initialize database");
+            string TableCreationCommand = "";
+            string TableInsertionCommand = "";
+            executeQuaery(SQLCommandContainer.createDB(), "Can't create Database"); // Database creation
+            this.m_connection = MyConstants.connectionToCSLibrary; // Changing connection from master to CSLibrary
+
+            // Reading commands from sql files
+            if (IOFileManager.readCommand(MyConstants.resourceSQL_TablesCreation, ref TableCreationCommand) &&
+                IOFileManager.readCommand(MyConstants.resourceSQL_TablesInsertion, ref TableInsertionCommand))
+            // initError initialization to chaeck if there was an error
+            // using inversion (!), because method returns false if there is an error. and initError is true if there was an error in initializaton
+                initError = !(executeQuaery(TableCreationCommand, "Can't create Tables") &&
+                            executeQuaery(TableInsertionCommand, "Can't insert Tables"));
         }
 
-        private bool checkDatabaseExist()
+        private bool checkDatabaseExist()   // returns true if DB exists
         {
             bool databaseExists = false;
-            string command = @"select count(*) 
-                               from sys.databases
-                               where name = 'CSLibrary'";
+            string command = SQLCommandContainer.checkDBexist();
             databaseExists = executeQuaeryWithReturn<bool>(command, "Can't find database");
             return databaseExists;
         }
-        private bool checkTablesExist()
+        private bool checkTablesExist()     // returns true if all tables exist
         {
-            const string fileName = "CheckTables.sql";
+            const string fileName = MyConstants.resourceSQL_CheckTables;
             string command = "";
             if (IOFileManager.readCommand(fileName, ref command))
                 return executeQuaeryWithReturn<bool>(command, "Can't find tables");  // if all tables exists => 0
-            return true;
+            return false;
         }
 
 
-        private bool executeQuaery(string command, string message = "Message")
+        private bool executeQuaery(string command, string message = "Message")  // true if everything is okay
         {
             try
             {

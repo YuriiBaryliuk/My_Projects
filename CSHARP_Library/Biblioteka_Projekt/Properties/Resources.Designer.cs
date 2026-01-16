@@ -68,5 +68,23 @@ namespace Biblioteka_Projekt.Properties {
                 return ResourceManager.GetString("CheckTables", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string TablesCreation {
+            get {
+                return ResourceManager.GetString("TablesCreation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string TablesInsertion {
+            get {
+                return ResourceManager.GetString("TablesInsertion", resourceCulture);
+            }
+        }
     }
 }

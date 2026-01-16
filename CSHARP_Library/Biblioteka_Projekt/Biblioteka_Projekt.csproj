@@ -9,10 +9,13 @@
 
   <ItemGroup>
     <None Remove="CheckTables.sql" />
+    <None Remove="TablesInsertion.sql" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="CheckTables.sql" />
+    <EmbeddedResource Include="TablesCreation.sql" />
+    <EmbeddedResource Include="TablesInsertion.sql" />
   </ItemGroup>
 
   <ItemGroup>
