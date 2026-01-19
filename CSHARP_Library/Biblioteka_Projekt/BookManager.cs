@@ -35,5 +35,11 @@
                 Console.WriteLine("Can't write a book to Database");
             }
         }
+
+        public override void deleteAll<Book>()
+        {
+            this.register.Clear();
+            IOFileManager.clearAllFile(pathToDB);
+        }
     }
 }

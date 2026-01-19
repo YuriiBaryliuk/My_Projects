@@ -25,8 +25,8 @@ internal class Program
             Console.WriteLine("Proper Initialization");
 
         //sqlManager.inputAndSave<Book>();
-        sqlManager.inputAndSave<Reader>();
-
+        //sqlManager.inputAndSave<Reader>();
+        sqlManager.deleteRecord<Book>(8);
 
         /*
         Book b = new Book("Author", "Title", 2000, 5);

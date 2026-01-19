@@ -13,6 +13,6 @@
         public abstract void printRegister();
         public abstract void inputAndSave<T>();
         public abstract T getLastMember();
-
+        public abstract void deleteAll<T>();
     }
 }

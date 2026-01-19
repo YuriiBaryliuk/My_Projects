@@ -35,5 +35,10 @@
                 Console.WriteLine("Can't write a reader to Database");
             }
         }
+        public override void deleteAll<Reader>()
+        {
+            this.register.Clear();
+            IOFileManager.clearAllFile(pathToDB);
+        }
     }
 }

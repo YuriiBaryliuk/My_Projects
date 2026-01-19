@@ -146,5 +146,16 @@
                 }
             return noException;
         }
+
+        public static void clearAllFile(string path)
+        {
+            if (File.Exists(path))
+            {
+                File.WriteAllText(path, "");
+                Console.WriteLine("File was cleared");
+            }
+            else
+                Console.WriteLine("Can't find a file");
+        }
     }
 }

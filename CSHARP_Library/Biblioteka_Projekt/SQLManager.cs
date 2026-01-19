@@ -160,5 +160,48 @@ namespace Biblioteka_Projekt
                 Console.WriteLine(message);
             }
         }
+        public void deleteAll<T>()
+        {
+            if (typeof(T) == typeof(Reader))
+            {
+                if (!(executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("Arrears")) ||
+                    executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("[Currently Loaned]")))){
+                    executeQuaery(SQLCommandContainer.uncheckAllConstraint("Loans"));
+                    executeQuaery(SQLCommandContainer.deleteAllRows("Reader"), "Can't delete a table");
+                    executeQuaery(SQLCommandContainer.checkAllConstraint("Loans"));
+                }
+                else Console.WriteLine("Can't delete Readers from the table\nSome readers are still loan books");
+            }
+            else if (typeof(T) == typeof(Book)){
+                if(!executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("[Currently Loaned]"))){
+                    executeQuaery(SQLCommandContainer.uncheckAllConstraint("Loans"));
+                    executeQuaery(SQLCommandContainer.deleteAllRows("Book"), "Can't delete a table");
+                    executeQuaery(SQLCommandContainer.checkAllConstraint("Loans"));
+                }
+                else Console.WriteLine("Can't delete Books from the table\nSome books are still loaned");
+            }
+        }
+
+        public void deleteRecord<T>(int ID)
+        {
+            if (typeof(T) == typeof(Reader))
+            {
+                if (!(executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("Arrears")) ||
+                    executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("[Currently Loaned]")))){
+                    executeQuaery(SQLCommandContainer.uncheckAllConstraint("Loans"));
+                    executeQuaery(SQLCommandContainer.deleteRecord(ID, "Reader"), "Can't delete a record");
+                    executeQuaery(SQLCommandContainer.checkAllConstraint("Loans"));
+                }
+                else Console.WriteLine("Can't delete a reader from the table\nReader still loanes books");
+            }
+            else if (typeof(T) == typeof(Book)){
+                if(!executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("[Currently Loaned]"))){
+                    executeQuaery(SQLCommandContainer.uncheckAllConstraint("Loans"));
+                    executeQuaery(SQLCommandContainer.deleteRecord(ID, "Book"), "Can't delete a record");
+                    executeQuaery(SQLCommandContainer.checkAllConstraint("Loans"));
+                }
+                else Console.WriteLine("Can't delete book from the table\nBook is still loaned");
+            }
+        }
     }
 }
