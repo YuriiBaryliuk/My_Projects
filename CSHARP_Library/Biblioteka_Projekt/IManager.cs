@@ -4,5 +4,6 @@
     {
         void inputAndSave<T>();
         void deleteAll<T>();
+        int getLastId<T>();
     }
 }

@@ -94,6 +94,17 @@ namespace Biblioteka_Projekt
             return false;
         }
 
+        public static int checkIfNum(string strNum)
+        {
+            if (int.TryParse(strNum, out int result))
+                return result;
+            else
+            {
+                Logs.writeLog("Can not convert string to int");
+                return 0;
+            }
+        }
+
         //private static void capitalizeFirstLetter(ref string param)
         //{
         //    param = char.ToUpper(param[0]) + param.Substring(1);

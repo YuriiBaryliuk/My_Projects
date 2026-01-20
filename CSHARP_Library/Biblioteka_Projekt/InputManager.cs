@@ -181,5 +181,33 @@ namespace Biblioteka_Projekt
             }
             return Convert.ToInt32(genreID);
         }
+
+        //--------------------SQL--------------------------
+
+        public static Dictionary<string, int> loanBook()
+        {
+            Dictionary<string, int> loanDict = new Dictionary<string, int>();
+            int reader_id = InputCheck.checkIfNum(InputManager.initAndCheckIfNull("Reader id"));
+            int staff_id = InputCheck.checkIfNum(InputManager.initAndCheckIfNull("Your id"));
+            int book_id = InputCheck.checkIfNum(InputManager.initAndCheckIfNull("Book id"));
+
+            loanDict.Add("Reader_id", reader_id);
+            loanDict.Add("Staff_id", staff_id);
+            loanDict.Add("Book_id", book_id);
+
+            return loanDict;
+        }
+
+        public static Dictionary<string, int> receiveBook()
+        {
+            Dictionary<string, int> recDict = new Dictionary<string, int>();
+            int loan_id = InputCheck.checkIfNum(InputManager.initAndCheckIfNull("Loan id"));
+            int staff_id = InputCheck.checkIfNum(InputManager.initAndCheckIfNull("Your id"));
+
+            recDict.Add("Loan_id", loan_id);
+            recDict.Add("Staff_id", staff_id);
+
+            return recDict;
+        }
     }
 }

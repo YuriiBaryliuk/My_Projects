@@ -31,7 +31,7 @@ insert into Reader (Reader_id, LastName, FirstName, Gender, BirthDate, "Address"
 ALTER TABLE Reader CHECK CONSTRAINT ALL
 SET IDENTITY_INSERT Reader OFF;
 
-SET IDENTITY_INSERT Reader ON;
+SET IDENTITY_INSERT Book ON;
 ALTER TABLE Book NOCHECK CONSTRAINT ALL
 insert into Book (Book_id, Author, Title, YearOfRelease, Genre_id, "Description") values (1, 'Marabel Guinery', 'Slacker', 2000, 1, '-');
 insert into Book (Book_id, Author, Title, YearOfRelease, Genre_id, "Description") values (2, 'Renault Tellenbrok', 'Homeward Bound II: Lost in San Francisco', 1992, 14, '-');
@@ -44,34 +44,34 @@ insert into Book (Book_id, Author, Title, YearOfRelease, Genre_id, "Description"
 insert into Book (Book_id, Author, Title, YearOfRelease, Genre_id, "Description") values (9, 'Rochelle Glasgow', 'Wagons East', 1995, 15, '-');
 insert into Book (Book_id, Author, Title, YearOfRelease, Genre_id, "Description") values (10, 'Melloney Mordan', 'Christine', 2008, 10, '-');
 ALTER TABLE Book CHECK CONSTRAINT ALL
-SET IDENTITY_INSERT Reader OFF;
+SET IDENTITY_INSERT Book OFF;
 
-SET IDENTITY_INSERT Reader ON;
+SET IDENTITY_INSERT Staff ON;
 ALTER TABLE Staff NOCHECK CONSTRAINT ALL
 insert into Staff (Staff_id, LastName, FirstName, Title) values (1, 'McVeighty', 'Candide', 'Librarian');
 insert into Staff (Staff_id, LastName, FirstName, Title) values (2, 'Awde', 'Berna', 'Manager');
 insert into Staff (Staff_id, LastName, FirstName, Title) values (3, 'Abbate', 'Livvy', 'Librarian');
 ALTER TABLE Staff CHECK CONSTRAINT ALL
-SET IDENTITY_INSERT Reader OFF;
+SET IDENTITY_INSERT Staff OFF;
 
 ALTER TABLE Loans NOCHECK CONSTRAINT ALL
-insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (10, 1, 5, '2025-01-09 10:30:00', null);
-insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (8, 1, 3, '2025-03-24 10:05:00', null);
-insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (7, 1, 10, '2025-05-19 17:34:00', null);
-insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (9, 3, 7, '2025-05-31 16:35:38', null);
-insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (4, 1, 5, '2025-08-20 13:52:43', null);
-insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (2, 3, 1, '2025-11-13 12:13:48', null);
-insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (6, 3, 8, '2025-12-25 18:13:10', null);
-insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (3, 1, 2, '2025-12-29 12:12:12', null);
+insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (10, 1, 5, '2025-01-09 10:30:00', '-');
+insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (8, 1, 3, '2025-03-24 10:05:00', '-');
+insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (7, 1, 10, '2025-05-19 17:34:00', '-');
+insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (9, 3, 7, '2025-05-31 16:35:38', '-');
+insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (4, 1, 5, '2025-08-20 13:52:43', '-');
+insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (2, 3, 1, '2025-11-13 12:13:48', '-');
+insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (6, 3, 8, '2025-12-25 18:13:10', '-');
+insert into Loans (Reader_id, Staff_id, Book_id, LoanDate, Note) values (3, 1, 2, '2025-12-29 12:12:12', '-');
 ALTER TABLE Loans CHECK CONSTRAINT ALL
 
 
 ALTER TABLE Recievings NOCHECK CONSTRAINT ALL
-insert into Recievings (Loan_id, Staff_id, RecievingDate, Note) values (1, 1, '2025-01-15 18:32:02', null);
-insert into Recievings (Loan_id, Staff_id, RecievingDate, Note) values (2, 3, '2025-04-24 14:02:19', null);
-insert into Recievings (Loan_id, Staff_id, RecievingDate, Note) values (3, 3, '2025-05-25 15:16:17', null);
-insert into Recievings (Loan_id, Staff_id, RecievingDate, Note) values (4, 1, '2025-06-08 17:10:33', null);
-insert into Recievings (Loan_id, Staff_id, RecievingDate, Note) values (5, 3, '2025-08-29 12:11:12', null);
+insert into Recievings (Loan_id, Staff_id, RecievingDate, Note) values (1, 1, '2025-01-15 18:32:02', '-');
+insert into Recievings (Loan_id, Staff_id, RecievingDate, Note) values (2, 3, '2025-04-24 14:02:19', '-');
+insert into Recievings (Loan_id, Staff_id, RecievingDate, Note) values (3, 3, '2025-05-25 15:16:17', '-');
+insert into Recievings (Loan_id, Staff_id, RecievingDate, Note) values (4, 1, '2025-06-08 17:10:33', '-');
+insert into Recievings (Loan_id, Staff_id, RecievingDate, Note) values (5, 3, '2025-08-29 12:11:12', '-');
 ALTER TABLE Recievings CHECK CONSTRAINT ALL
 
 

@@ -14,5 +14,6 @@
         public abstract void inputAndSave<T>();
         public abstract T getLastMember();
         public abstract void deleteAll<T>();
+        public abstract int getLastId<T>();
     }
 }

@@ -40,5 +40,11 @@
             this.register.Clear();
             IOFileManager.clearAllFile(pathToDB);
         }
+        public override int getLastId<Reader>()
+        {
+            if (register.Count != 0)
+                return register.Last().m_ID;
+            return 0;
+        }
     }
 }
