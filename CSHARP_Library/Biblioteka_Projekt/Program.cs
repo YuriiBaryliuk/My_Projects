@@ -28,7 +28,8 @@ internal class Program
         //sqlManager.loanBook();
         //sqlManager.ReceiveBook();
 
-        sqlManager.printTable("Reader", MyConstants.columnNames_Reader);
+        //sqlManager.printTable("Reader", MyConstants.columnNames_Reader);
+        sqlManager.inputAndSave<Staff>();
 
         /*
         Book b = new Book("Author", "Title", 2000, 5);

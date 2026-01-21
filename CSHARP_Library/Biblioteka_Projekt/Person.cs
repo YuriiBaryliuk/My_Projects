@@ -5,8 +5,8 @@ namespace Biblioteka_Projekt
 {
     internal class Person
     {
-        public string m_name { get; private set; }
-        public string m_surname { get; private set; }
+        public string m_name { get; protected set; }
+        public string m_surname { get; protected set; }
         public char m_gender { get; private set; }
         public DateTime m_dateOfBirth { get; private set; }
         public int m_age{ get; private set; }
@@ -14,6 +14,11 @@ namespace Biblioteka_Projekt
         public string m_phoneNumber{ get; private set; }
         public string m_email{ get; private set; }
 
+        public Person(string name, string surname)
+        {
+            m_name = name;
+            m_surname = surname;
+        }
         public Person(string name, string surname, char gender, DateTime dateOfBirth, Address address, string phoneNumber, string email)
         {
             m_name = name;

@@ -182,6 +182,20 @@ namespace Biblioteka_Projekt
             return Convert.ToInt32(genreID);
         }
 
+        //--------------------STAFF------------------------
+
+        public static Staff inputStaff()
+        {
+            string name, surname, title;
+            
+            Console.WriteLine("Enter Reader's data below");
+            name = MyReformatting.firstLetterToUpper(singleInputInit("name", InputCheck.checkPersonName));
+            surname = MyReformatting.firstLetterToUpper(singleInputInit("surname", InputCheck.checkPersonSurame));
+            title = MyReformatting.firstLetterToUpper(singleInputInit("title", InputCheck.checkStaffTitle));
+
+            return new Staff(name, surname, title);
+        }
+
         //--------------------SQL--------------------------
 
         public static Dictionary<string, int> loanBook()

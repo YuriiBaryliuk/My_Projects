@@ -16,6 +16,7 @@ namespace Biblioteka_Projekt
         const string regexAuthorPattern = @"^[A-Za-z0-9\s,.\-/&]{2,100}$";
         const string regexReleaseYearPattern = @"^\d{1,4}$";
         const string regexEmailPattern = @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$";
+        const string regexTitlePattern = @"^[A-Za-zĆŁŚŻąćęłńóśżź]{2,}$";
 
         public static bool checkPersonName(string name)
         {
@@ -105,9 +106,12 @@ namespace Biblioteka_Projekt
             }
         }
 
-        //private static void capitalizeFirstLetter(ref string param)
-        //{
-        //    param = char.ToUpper(param[0]) + param.Substring(1);
-        //}
+        public static bool checkStaffTitle(string title)
+        {
+            title = char.ToUpper(title[0]) + title.Substring(1);
+            if(Regex.IsMatch(title, regexTitlePattern))
+                return true;
+            return false;
+        }
     }
 }

@@ -94,6 +94,11 @@ namespace Biblioteka_Projekt
         {
             return $"select * from [{tableName}]";
         }
+        public static string addStaff()
+        {
+            return @"insert into Staff (LastName, FirstName, Title) 
+                     values (@LastName, @FirstName, @Title)";
+        }
     }
 
 }

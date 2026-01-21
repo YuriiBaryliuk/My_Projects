@@ -115,6 +115,11 @@ namespace Biblioteka_Projekt
                 Console.WriteLine("Book");
                 insertBook(InputManager.InputBook());
             }
+            else if (typeof(T) == typeof(Staff))
+            {
+                Console.WriteLine("Staff");
+                insertStaff(InputManager.inputStaff());
+            }
         }
 
         private void insertReader(Reader r, string message = "Can't insert a reader")
@@ -123,7 +128,6 @@ namespace Biblioteka_Projekt
             using SqlConnection connection = new SqlConnection(m_connection);
             using SqlCommand command = new SqlCommand(SQLCommandContainer.addReader(), connection);
                 connection.Open();
-                //command.Parameters.AddWithValue("@Reader_id", r.m_ID);
                 command.Parameters.AddWithValue("@LastName", r.m_surname);
                 command.Parameters.AddWithValue("@FirstName", r.m_name);
                 command.Parameters.AddWithValue("@Gender", r.m_gender);
@@ -151,12 +155,32 @@ namespace Biblioteka_Projekt
             using SqlConnection connection = new SqlConnection(m_connection);
             using SqlCommand command = new SqlCommand(SQLCommandContainer.addBook(), connection);
                 connection.Open();
-                //command.Parameters.AddWithValue("@Book_id", b.m_ID);
                 command.Parameters.AddWithValue("@Author", b.m_author);
                 command.Parameters.AddWithValue("@Title", b.m_title);
                 command.Parameters.AddWithValue("@YearOfRelease", b.m_yearOfRelease);
                 command.Parameters.AddWithValue("@Genre_id", b.m_genreID);
                 command.Parameters.AddWithValue("@BookDescription", b.m_description);
+
+                command.ExecuteNonQuery();
+            }catch(SqlException ex){
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }catch(Exception ex)
+            {
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }
+        }
+
+        public void insertStaff(Staff s, string message = "Can't insert a staff member")
+        {
+            try{
+            using SqlConnection connection = new SqlConnection(m_connection);
+            using SqlCommand command = new SqlCommand(SQLCommandContainer.addStaff(), connection);
+                connection.Open();
+                command.Parameters.AddWithValue("@LastName", s.m_surname);
+                command.Parameters.AddWithValue("@FirstName", s.m_name);
+                command.Parameters.AddWithValue("@Title", s.m_title);
 
                 command.ExecuteNonQuery();
             }catch(SqlException ex){
