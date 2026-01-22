@@ -29,7 +29,9 @@ internal class Program
         //sqlManager.ReceiveBook();
 
         //sqlManager.printTable("Reader", MyConstants.columnNames_Reader);
-        sqlManager.inputAndSave<Staff>();
+        //sqlManager.inputAndSave<Book>();
+        //sqlManager.ReceiveBook();
+        //sqlManager.findRecordByID(MyConstants.tableName_Reader, MyConstants.columnNames_Reader, 5);
 
         /*
         Book b = new Book("Author", "Title", 2000, 5);

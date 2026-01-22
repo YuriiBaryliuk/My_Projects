@@ -61,7 +61,6 @@ namespace Biblioteka_Projekt
         {
             return executeQuaery(SQLCommandContainer.updateArrears(), "Can't update arrears");
         }
-
         private bool executeQuaery(string command, string message = "Message")  // true if everything is okay
         {
             try
@@ -108,16 +107,13 @@ namespace Biblioteka_Projekt
         {
             if (typeof(T) == typeof(Reader))
             {
-                Console.WriteLine("Reader");
                 insertReader(InputManager.InputReader());
             }
             else if (typeof(T) == typeof(Book)){
-                Console.WriteLine("Book");
                 insertBook(InputManager.InputBook());
             }
             else if (typeof(T) == typeof(Staff))
             {
-                Console.WriteLine("Staff");
                 insertStaff(InputManager.inputStaff());
             }
         }
@@ -125,9 +121,9 @@ namespace Biblioteka_Projekt
         private void insertReader(Reader r, string message = "Can't insert a reader")
         {
             try{
-            using SqlConnection connection = new SqlConnection(m_connection);
-            using SqlCommand command = new SqlCommand(SQLCommandContainer.addReader(), connection);
-                connection.Open();
+            using SqlConnection sqlConnect = new SqlConnection(m_connection);
+            using SqlCommand command = new SqlCommand(SQLCommandContainer.addReader(), sqlConnect);
+                sqlConnect.Open();
                 command.Parameters.AddWithValue("@LastName", r.m_surname);
                 command.Parameters.AddWithValue("@FirstName", r.m_name);
                 command.Parameters.AddWithValue("@Gender", r.m_gender);
@@ -152,9 +148,9 @@ namespace Biblioteka_Projekt
         private void insertBook(Book b, string message = "Can't insert a book")
         {
             try{
-            using SqlConnection connection = new SqlConnection(m_connection);
-            using SqlCommand command = new SqlCommand(SQLCommandContainer.addBook(), connection);
-                connection.Open();
+            using SqlConnection sqlConnect = new SqlConnection(m_connection);
+            using SqlCommand command = new SqlCommand(SQLCommandContainer.addBook(), sqlConnect);
+                sqlConnect.Open();
                 command.Parameters.AddWithValue("@Author", b.m_author);
                 command.Parameters.AddWithValue("@Title", b.m_title);
                 command.Parameters.AddWithValue("@YearOfRelease", b.m_yearOfRelease);
@@ -172,12 +168,12 @@ namespace Biblioteka_Projekt
             }
         }
 
-        public void insertStaff(Staff s, string message = "Can't insert a staff member")
+        private void insertStaff(Staff s, string message = "Can't insert a staff member")
         {
             try{
-            using SqlConnection connection = new SqlConnection(m_connection);
-            using SqlCommand command = new SqlCommand(SQLCommandContainer.addStaff(), connection);
-                connection.Open();
+            using SqlConnection sqlConnect = new SqlConnection(m_connection);
+            using SqlCommand command = new SqlCommand(SQLCommandContainer.addStaff(), sqlConnect);
+                sqlConnect.Open();
                 command.Parameters.AddWithValue("@LastName", s.m_surname);
                 command.Parameters.AddWithValue("@FirstName", s.m_name);
                 command.Parameters.AddWithValue("@Title", s.m_title);
@@ -196,43 +192,48 @@ namespace Biblioteka_Projekt
         {
             if (typeof(T) == typeof(Reader))
             {
-                if (!(executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("Arrears")) ||
-                    executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("[Currently Loaned]")))){
-                    executeQuaery(SQLCommandContainer.uncheckAllConstraint("Loans"));
-                    executeQuaery(SQLCommandContainer.deleteAllRows("Reader"), "Can't delete a table");
-                    executeQuaery(SQLCommandContainer.checkAllConstraint("Loans"));
+                if (!(executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist(MyConstants.tableName_Arrears)) ||
+                    executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist($"[{MyConstants.tableName_CurrentlyLoaned}]")))){
+                    executeQuaery(SQLCommandContainer.uncheckAllConstraint(MyConstants.tableName_Loans));
+                    executeQuaery(SQLCommandContainer.deleteAllRows(MyConstants.tableName_Reader), "Can't delete a table");
+                    executeQuaery(SQLCommandContainer.checkAllConstraint(MyConstants.tableName_Loans));
                 }
                 else Console.WriteLine("Can't delete Readers from the table\nSome readers are still loan books");
             }
             else if (typeof(T) == typeof(Book)){
-                if(!executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("[Currently Loaned]"))){
-                    executeQuaery(SQLCommandContainer.uncheckAllConstraint("Loans"));
-                    executeQuaery(SQLCommandContainer.deleteAllRows("Book"), "Can't delete a table");
-                    executeQuaery(SQLCommandContainer.checkAllConstraint("Loans"));
+                if(!executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist($"[{MyConstants.tableName_CurrentlyLoaned}]"))){
+                    executeQuaery(SQLCommandContainer.uncheckAllConstraint(MyConstants.tableName_Loans));
+                    executeQuaery(SQLCommandContainer.deleteAllRows(MyConstants.tableName_Book), "Can't delete a table");
+                    executeQuaery(SQLCommandContainer.checkAllConstraint(MyConstants.tableName_Loans));
                 }
                 else Console.WriteLine("Can't delete Books from the table\nSome books are still loaned");
             }
+            else if (typeof(T) == typeof(Staff)){
+                executeQuaery(SQLCommandContainer.deleteAllRows(MyConstants.tableName_Staff), "Can't delete Staff members");
+            }
         }
-
         public void deleteRecord<T>(int ID)
         {
             if (typeof(T) == typeof(Reader))
             {
-                if (!(executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("Arrears")) ||
-                    executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("[Currently Loaned]")))){
-                    executeQuaery(SQLCommandContainer.uncheckAllConstraint("Loans"));
-                    executeQuaery(SQLCommandContainer.deleteRecord(ID, "Reader", "Reader_id"), "Can't delete a record");
-                    executeQuaery(SQLCommandContainer.checkAllConstraint("Loans"));
+                if (!(executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist(MyConstants.tableName_Arrears)) ||
+                    executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist($"[{MyConstants.tableName_CurrentlyLoaned}]")))){
+                    executeQuaery(SQLCommandContainer.uncheckAllConstraint(MyConstants.tableName_Loans));
+                    executeQuaery(SQLCommandContainer.deleteRecord(ID, MyConstants.tableName_Reader, MyConstants.columnNames_Reader[0]), "Can't delete a record");
+                    executeQuaery(SQLCommandContainer.checkAllConstraint(MyConstants.tableName_Loans));
                 }
                 else Console.WriteLine("Can't delete a reader from the table\nReader still loanes books");
             }
             else if (typeof(T) == typeof(Book)){
-                if(!executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist("[Currently Loaned]"))){
-                    executeQuaery(SQLCommandContainer.uncheckAllConstraint("Loans"));
-                    executeQuaery(SQLCommandContainer.deleteRecord(ID, "Book", "Book_id"), "Can't delete a record");
-                    executeQuaery(SQLCommandContainer.checkAllConstraint("Loans"));
+                if(!executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordsExist($"[{MyConstants.tableName_CurrentlyLoaned}]"))){
+                    executeQuaery(SQLCommandContainer.uncheckAllConstraint(MyConstants.tableName_Loans));
+                    executeQuaery(SQLCommandContainer.deleteRecord(ID, MyConstants.tableName_Book, MyConstants.columnNames_Book[0]), "Can't delete a record");
+                    executeQuaery(SQLCommandContainer.checkAllConstraint(MyConstants.tableName_Loans));
                 }
                 else Console.WriteLine("Can't delete book from the table\nBook is still loaned");
+            }
+            else if (typeof(T) == typeof(Staff)){
+                executeQuaery(SQLCommandContainer.deleteRecord(ID, MyConstants.tableName_Staff, MyConstants.columnNames_Staff[0]));
             }
         }
 
@@ -242,7 +243,7 @@ namespace Biblioteka_Projekt
             Console.Write("Description: ");
             string description = Console.ReadLine();
             if (executeQuaery(SQLCommandContainer.loanBook(loanDict, string.IsNullOrEmpty(description) ? "-" : description), "Can't process operation"))
-                insertValueIntoTable<int>(executeQuaeryWithReturn<int>(SQLCommandContainer.getMaxElement("Loans", "Loan_id"), "Can't add book to currently loaned books"), "Currently Loaned");
+                insertValueIntoTable<int>(executeQuaeryWithReturn<int>(SQLCommandContainer.getMaxElement(MyConstants.tableName_Loans, MyConstants.columnNames_Loans[0]), "Can't add book to currently loaned books"), $"[{MyConstants.tableName_CurrentlyLoaned}]");
         }
         public void ReceiveBook()
         {
@@ -250,30 +251,30 @@ namespace Biblioteka_Projekt
             Console.Write("Description: ");
             string description = Console.ReadLine();
             if (executeQuaery(SQLCommandContainer.receiveBook(recDict, string.IsNullOrEmpty(description) ? "-" : description), "Can't process operation"))
-                executeQuaery(SQLCommandContainer.deleteRecord(recDict["Loan_id"], "Currently Loaned", "Loan_id"));
+                executeQuaery(SQLCommandContainer.deleteRecord(recDict[MyConstants.columnNames_Loans[0]], $"{MyConstants.tableName_CurrentlyLoaned}", MyConstants.columnNames_Loans[0]));
         }
 
         public int getLastId<T>()
         {
             if (typeof(T) == typeof(Reader))
-                return executeQuaeryWithReturn<int>(SQLCommandContainer.getMaxElement("Reader", "Reader_id"), "Can't get last element");
+                return executeQuaeryWithReturn<int>(SQLCommandContainer.getMaxElement(MyConstants.tableName_Reader, MyConstants.columnNames_Reader[0]), "Can't get last element");
             else if (typeof(T) == typeof(Book))
-                return executeQuaeryWithReturn<int>(SQLCommandContainer.getMaxElement("Book", "Book_id"), "Can't get last element");
+                return executeQuaeryWithReturn<int>(SQLCommandContainer.getMaxElement(MyConstants.tableName_Book, MyConstants.columnNames_Book[0]), "Can't get last element");
             else return 0;
         }
 
-        public bool insertValueIntoTable<T>(T value, string tableName)
+        private bool insertValueIntoTable<T>(T value, string tableName)
         {
             return executeQuaery(SQLCommandContainer.insertValueIntoTable<T>(value, tableName));
         }
 
-        public void printTable(string tableName, string[] columnNames, string message = "Can't read data from a table")
+        public void printTable(string tableName, string[] columnNames, int orderBy = 0, bool ascending = true, string message = "Can't read data from a table")
         {
             try
             {
                 using SqlConnection sqlConnect = new SqlConnection(this.m_connection);
                 sqlConnect.Open();
-                using SqlCommand sqlCommand = new SqlCommand(SQLCommandContainer.printTable(tableName), sqlConnect);
+                using SqlCommand sqlCommand = new SqlCommand(SQLCommandContainer.printTable(tableName, columnNames[orderBy], ascending), sqlConnect);
                 SqlDataReader reader = sqlCommand.ExecuteReader();
 
                 Console.WriteLine($"--------------{tableName} table--------------");
@@ -286,6 +287,71 @@ namespace Biblioteka_Projekt
                     }
                     Console.WriteLine();
                 }
+
+            }catch(SqlException ex)
+            {
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }catch(Exception ex)
+            {
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }
+        }
+
+        public void findRecords<T>(string tableName, string[] columnNames, int columnID, T value, string message = "Can't find a record")
+        {
+            try
+            {
+                using SqlConnection sqlConnect = new SqlConnection(this.m_connection);
+                sqlConnect.Open();
+                using SqlCommand sqlCommand = new SqlCommand(SQLCommandContainer.findRecord(tableName, columnNames[columnID]), sqlConnect);
+
+                sqlCommand.Parameters.AddWithValue("@Val", value);
+
+                SqlDataReader reader = sqlCommand.ExecuteReader();
+
+                Console.WriteLine($"--------------{tableName} table--------------");
+
+                while (reader.Read())
+                {
+                    foreach(string columnName in columnNames)
+                    {
+                        Console.WriteLine($"{columnName}: {reader[columnName]}");
+                    }
+                    Console.WriteLine();
+                }
+
+            }catch(SqlException ex)
+            {
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }catch(Exception ex)
+            {
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }
+        }
+        public void findRecordByID(string tableName, string[] columnNames, int ID, string message = "Can't find a record")
+        {
+            try
+            {
+                using SqlConnection sqlConnect = new SqlConnection(this.m_connection);
+                sqlConnect.Open();
+                using SqlCommand sqlCommand = new SqlCommand(SQLCommandContainer.findRecordByID(tableName, columnNames[0], ID), sqlConnect);
+                SqlDataReader reader = sqlCommand.ExecuteReader();
+
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        foreach (string columnName in columnNames)
+                        {
+                            Console.WriteLine($"{columnName}: {reader[columnName]}");
+                        }
+                    }
+                }
+                else Console.WriteLine($"There are no records for id: {ID}");
 
             }catch(SqlException ex)
             {

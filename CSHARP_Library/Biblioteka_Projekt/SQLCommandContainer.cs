@@ -90,15 +90,26 @@ namespace Biblioteka_Projekt
             else return "";
         }
 
-        public static string printTable(string tableName)
+        public static string printTable(string tableName, string orderBy_columnName, bool ascending)
         {
-            return $"select * from [{tableName}]";
+            if (ascending == true)
+                return $"select * from [{tableName}] order by [{orderBy_columnName}]";
+            else
+                return $"select * from [{tableName}] order by [{orderBy_columnName}] desc";
         }
         public static string addStaff()
         {
             return @"insert into Staff (LastName, FirstName, Title) 
                      values (@LastName, @FirstName, @Title)";
         }
-    }
 
+        public static string findRecord(string tableName, string columnName)
+        {
+            return $"select * from [{tableName}] where [{columnName}] like '%' + @Val + '%'";
+        }
+        public static string findRecordByID(string tableName, string columnName, int ID)
+        {
+            return $"select * from [{tableName}] where [{columnName}] = {ID}";
+        }
+    }
 }

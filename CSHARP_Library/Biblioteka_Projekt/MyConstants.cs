@@ -13,6 +13,15 @@
         public const string resourceSQL_CheckTables = appNamespace + "CheckTables.sql";
         public const string resourceSQL_TablesCreation = appNamespace + "TablesCreation.sql";
         public const string resourceSQL_TablesInsertion = appNamespace + "TablesInsertion.sql";
+        public const string tableName_Book = "Book";
+        public const string tableName_Reader = "Reader";
+        public const string tableName_Staff = "Staff";
+        public const string tableName_Arrears = "Arrears";
+        public const string tableName_CurrentlyLoaned = "Currently Loaned";
+        public const string tableName_Genre = "Genre";
+        public const string tableName_Loans = "Loans";
+        public const string tableName_Payments = "Payments";
+        public const string tableName_Receivings = "Recievings";
         public static readonly string[] columnNames_Book = { "Book_id", "Author", "Title", "YearOfRelease", "Genre_id", "Description" };
         public static readonly string[] columnNames_Reader = { "Reader_id", "LastName", "FirstName", "Gender", "BirthDate", "Address", "City", "Phone", "Email", "Registered" };
         public static readonly string[] columnNames_Staff = { "Staff_id", "LastName", "FirstName", "Title"};
