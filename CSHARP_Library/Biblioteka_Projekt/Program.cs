@@ -19,45 +19,17 @@ internal class Program
         
         SQLManager sqlManager = new SQLManager(MyConstants.connectionToMaster);
         
-        if (sqlManager.getInitError())
-            Console.WriteLine("Not Proper Initialization");
-        else
+        if (!sqlManager.getInitError()){
             Console.WriteLine("Proper Initialization");
 
-        //sqlManager.inputAndSave<Reader>();
-        //sqlManager.loanBook();
-        //sqlManager.ReceiveBook();
+            StaffMenu staffMenu = new StaffMenu(sqlManager);
+            staffMenu.MainMenu();
+        }
 
-        //sqlManager.printTable("Reader", MyConstants.columnNames_Reader);
-        //sqlManager.inputAndSave<Book>();
-        //sqlManager.ReceiveBook();
-        //sqlManager.findRecordByID(MyConstants.tableName_Reader, MyConstants.columnNames_Reader, 5);
-
-        /*
-        Book b = new Book("Author", "Title", 2000, 5);
-        using SqlConnection connection = new SqlConnection(MyConstants.connectionToCSLibrary);
-        using SqlCommand command = new SqlCommand(SQLCommandContainer.addBook(), connection);
-        connection.Open();
-                //command.Parameters.AddWithValue("@Book_id", b.m_ID);
-                command.Parameters.AddWithValue("@Author", b.m_author);
-                command.Parameters.AddWithValue("@Title", b.m_title);
-                command.Parameters.AddWithValue("@YearOfRelease", b.m_yearOfRelease);
-                command.Parameters.AddWithValue("@Genre_id", b.m_genreID);
-                command.Parameters.AddWithValue("@BookDescription", b.m_description);
-
-        command.ExecuteNonQuery();
-        */
-        //foreach (var name in Assembly.GetExecutingAssembly().GetManifestResourceNames())
-        //    Console.WriteLine(name);
+        else
+            Console.WriteLine("Not Proper Initialization");
 
        
-
-        /*
-        using var man = Assembly.GetExecutingAssembly().GetManifestResourceStream("Biblioteka_Projekt.CheckTables.sql");
-        StreamReader sr = new StreamReader(man);
-        string command = sr.ReadToEnd();
-        Console.WriteLine(command);
-        */
     }
 
 }

@@ -223,5 +223,20 @@ namespace Biblioteka_Projekt
 
             return recDict;
         }
+        public static int enterNum(string name = "ID")
+        {
+            string ID = initAndCheckIfNull(name);
+            return InputCheck.checkIfNum(ID);
+        }
+        public static string enterStringFindTarget()
+        {
+            string value = initAndCheckIfNull("Value to find");
+            return value;
+        }
+        public static int enterIntFindTarget()
+        {
+            string value = initAndCheckIfNull("Value to find");
+            return InputCheck.checkIfNum(value);
+        }
     }
 }

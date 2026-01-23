@@ -59,6 +59,26 @@ namespace Biblioteka_Projekt
         {
             return $"select count(*) from [{tableName}]";
         }
+        public static string checkIfRecordExistUsingID(string tableName, string columnName, int ID)
+        {
+            return $"select count(*) from [{tableName}] where {columnName} = {ID}";
+        }
+        public static string checkReadersCurrentlyLoaningID(int ID)
+        {
+            return $"select count(Reader_id) " +
+                   $"from [Currently Loaned] CL " +
+                   $"join Loans L " +
+                   $"on CL.Loan_id = L.Loan_id " +
+                   $"where L.Reader_id = {ID}";
+        }
+        public static string checkBooksCurrentlyLoaningID(int ID)
+        {
+            return $"select count(Book_id) " +
+                   $"from [Currently Loaned] CL " +
+                   $"join Loans L " +
+                   $"on CL.Loan_id = L.Loan_id " +
+                   $"where L.Book_id = {ID}";
+        }
 
         public static string deleteRecord(int ID, string tableName, string columnName)
         {
@@ -103,9 +123,13 @@ namespace Biblioteka_Projekt
                      values (@LastName, @FirstName, @Title)";
         }
 
-        public static string findRecord(string tableName, string columnName)
+        public static string findRecord_String(string tableName, string columnName)
         {
             return $"select * from [{tableName}] where [{columnName}] like '%' + @Val + '%'";
+        }
+        public static string findRecord_Int(string tableName, string columnName)
+        {
+            return $"select * from [{tableName}] where [{columnName}] = @Val";
         }
         public static string findRecordByID(string tableName, string columnName, int ID)
         {
