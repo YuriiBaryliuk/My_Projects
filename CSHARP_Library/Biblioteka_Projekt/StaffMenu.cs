@@ -1,6 +1,6 @@
 ﻿namespace Biblioteka_Projekt
 {
-    internal class StaffMenu : IMenu
+    internal class StaffMenu : ISQLMenu
     {
         public SQLManager sqlManager { get; private set; }
         public StaffMenu(SQLManager sqlManager)
@@ -99,7 +99,7 @@
             this.sqlManager.ReceiveBook();
         }
 
-        private void SeeLast()
+        public void SeeLast()
         {
             MenuContainer.seeLastOp_Staff();
             string? option = Console.ReadLine();
@@ -385,5 +385,7 @@
                     break;
             }
         }
+
+        public void DeleteAll(){ }
     }
 }
