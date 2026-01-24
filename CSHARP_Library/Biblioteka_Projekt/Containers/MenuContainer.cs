@@ -2,6 +2,7 @@
 {
     internal static class MenuContainer
     {
+        //-------------Staff-------------
         private static string toMainMenu()
         {
             return "\nAny key: Return to main menu";
@@ -86,6 +87,46 @@
         public static void printColumns_FindPayments()
         {
             Console.WriteLine($"1. {MyConstants.columnNames_Payments[1]}");
+        }
+
+        //-------------Manager-------------
+        public static void mainMenu_Manager()
+        {
+            Console.WriteLine("1. Add staff\n2. Delete staff\n3. Delete All\n4. See last\n5. Show\n6. Find\n7. Find by ID\n9. Exit");
+        }
+        public static void addOp_Manager()
+        {
+            Console.WriteLine("1. Add staff" + toMainMenu());
+        }
+        public static void deleteOp_Manager()
+        {
+            Console.WriteLine("1. Delete staff" + toMainMenu());
+        }
+        public static void deleteAll_Manager()
+        {
+            Console.WriteLine("1. Delete all Readers\n2. Delete all Books\nDelete all Staff members");
+        }
+        public static void seeLastOp_Manager()
+        {
+            Console.WriteLine("1. Added staff member" + toMainMenu());
+        }
+        public static void printColumns_FindStaff()
+        {
+            Console.WriteLine($"1. {MyConstants.columnNames_Reader[1]}\n" +
+                $"2. {MyConstants.columnNames_Reader[2]}\n" +
+                $"3. {MyConstants.columnNames_Reader[3]}");
+        }
+        public static void mainMenu_Base()
+        {
+            Console.WriteLine("1. Add\n2. Delete All\n3. See last\n4. Show\n9. Exit");
+        }
+        public static void seeLastOp_Base()
+        {
+            Console.WriteLine("1. See last Reader\n2. See last Book" + toMainMenu());
+        }
+        public static void showAllOp_Base()
+        {
+            Console.WriteLine("1. Show all Readers\n2. Show all books" + toMainMenu());
         }
     }
 }

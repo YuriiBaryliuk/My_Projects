@@ -7,16 +7,17 @@
     <nullable>enable</nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="CheckTables.sql" />
-    <None Remove="TablesInsertion.sql" />
+  <!--<ItemGroup>
+    <None Remove="FilseSql/CheckTables.sql" />
+    <None Remove="FilesSql/TablesCreation.sql" />
+    <None Remove="FilseSql/TablesInsertion.sql" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="CheckTables.sql" />
-    <EmbeddedResource Include="TablesCreation.sql" />
-    <EmbeddedResource Include="TablesInsertion.sql" />
-  </ItemGroup>
+    <EmbeddedResource Include="FilesSql/CheckTables.sql" />
+    <EmbeddedResource Include="FilesSql/TablesCreation.sql" />
+    <EmbeddedResource Include="FilseSql/TablesInsertion.sql" />
+  </ItemGroup>-->
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />

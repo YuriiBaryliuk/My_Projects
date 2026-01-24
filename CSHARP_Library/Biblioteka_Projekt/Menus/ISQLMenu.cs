@@ -6,6 +6,5 @@
         void ShowWithOrder(string tableName, string[] columns);
         void Find();
         void FindByID();
-        void MainMenu();
     }
 }

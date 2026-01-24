@@ -6,5 +6,6 @@
         void Show();
         void DeleteAll();
         void SeeLast();
+        void MainMenu();
     }
 }
