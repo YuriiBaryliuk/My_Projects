@@ -2,10 +2,10 @@
 {
     internal class BaseMenu : IMenu
     {
-        ReaderManager rm;
-        BookManager bm;
+        ManagerBase<Reader> rm;
+        ManagerBase<Book> bm;
 
-        public BaseMenu(ReaderManager rm, BookManager bm)
+        public BaseMenu(ManagerBase<Reader> rm, ManagerBase<Book> bm)
         {
             this.rm = rm;
             this.bm = bm;

@@ -1,4 +1,5 @@
-﻿namespace Biblioteka_Projekt
+﻿// Manager for Files database to work with Book objects and files
+namespace Biblioteka_Projekt
 {
     internal class BookManager : ManagerBase<Book>
     {
