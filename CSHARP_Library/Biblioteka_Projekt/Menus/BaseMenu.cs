@@ -33,7 +33,7 @@
                     Console.WriteLine("Show");
                     Show();
                     break;
-                case "9":
+                case "0":
                     Environment.Exit(0);
                     break;
             }

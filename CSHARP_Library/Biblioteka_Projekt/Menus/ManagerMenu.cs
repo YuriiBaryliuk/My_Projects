@@ -56,7 +56,7 @@
                     Console.WriteLine("Find by ID");
                     FindByID();
                     break;
-                case "9":
+                case "0":
                     Environment.Exit(0);
                     break;
             }

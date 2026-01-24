@@ -47,6 +47,10 @@
                     FindByID();
                     break;
                 case "9":
+                    Console.WriteLine("Calculate arrears");
+                    CalculateArrears();
+                    break;
+                case "0":
                     Environment.Exit(0);
                     break;
             }
@@ -386,6 +390,11 @@
             }
         }
 
+        private void CalculateArrears()
+        {
+            int ID = InputManager.enterNum();
+            this.sqlManager.calculateArrears(ID);
+        }
         public void DeleteAll(){ }
     }
 }

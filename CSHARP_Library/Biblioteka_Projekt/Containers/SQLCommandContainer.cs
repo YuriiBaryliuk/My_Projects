@@ -26,7 +26,7 @@ namespace Biblioteka_Projekt
         {
             return @"delete from Arrears
                     insert into Arrears
-                    select L.Reader_id, DATEDIFF(day, LoanDate, GETDATE())
+                    select L.Reader_id, DATEDIFF(day, LoanDate, GETDATE()) - 14
                     from [Currently Loaned] CL
                     inner join Loans L
                     on CL.Loan_id = L.Loan_id
@@ -138,6 +138,10 @@ namespace Biblioteka_Projekt
         public static string findRecordByID(string tableName, string columnName, int ID)    // Find record by ID
         {
             return $"select * from [{tableName}] where [{columnName}] = {ID}";
+        }
+        public static string getDays(int ID)    // Get days from Arrears using reader ID
+        {
+            return $"select Days from Arrears where Reader_id = {ID}";
         }
     }
 }

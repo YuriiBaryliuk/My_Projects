@@ -379,5 +379,28 @@ namespace Biblioteka_Projekt
                 Console.WriteLine(message);
             }
         }
+
+        public void calculateArrears(int ID, string message = "Can't calculate belongings")
+        {
+            try{
+                if (!executeQuaeryWithReturn<bool>(SQLCommandContainer.checkIfRecordExistUsingID(MyConstants.tableName_Arrears, MyConstants.columnNames_Arrears[0], ID), "Can't find Reader")){
+                    Console.WriteLine("This reader has no arrears");
+                    return;
+                }
+                else
+                {
+                    int belongings = MyConstants.arrearsRate * executeQuaeryWithReturn<int>(SQLCommandContainer.getDays(ID), "Can't calculate belongings");
+                    Console.WriteLine($"Belongings for reader #{ID}: {belongings} zł");
+                }
+            }catch(SqlException ex)
+            {
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }catch(Exception ex)
+            {
+                Logs.writeLog(message + ": " + ex.Message);
+                Console.WriteLine(message);
+            }
+        }
     }
 }

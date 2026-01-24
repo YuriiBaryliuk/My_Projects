@@ -16,7 +16,7 @@ namespace Biblioteka_Projekt
         //-------------Staff-------------
         public static void mainMenu_Staff()     // Show main menu for staff
         {
-            Console.WriteLine("1. Add\n2. Delete\n3. Loan\n4. Receive\n5. See last\n6. Show\n7. Find\n8. Find by ID\n9. Exit");
+            Console.WriteLine("1. Add\n2. Delete\n3. Loan\n4. Receive\n5. See last\n6. Show\n7. Find\n8. Find by ID\n9. Calculate Arrears\n0. Exit");
         }
         public static void addOp_Staff()        // Show menu for add operation
         {
@@ -93,7 +93,7 @@ namespace Biblioteka_Projekt
         //-------------Manager-------------
         public static void mainMenu_Manager()   // Show main menu for manager
         {
-            Console.WriteLine("1. Add staff\n2. Delete staff\n3. Delete All\n4. See last\n5. Show\n6. Find\n7. Find by ID\n9. Exit");
+            Console.WriteLine("1. Add staff\n2. Delete staff\n3. Delete All\n4. See last\n5. Show\n6. Find\n7. Find by ID\n0. Exit");
         }
         public static void addOp_Manager()      // Show menu to add staff member
         {
@@ -121,7 +121,7 @@ namespace Biblioteka_Projekt
         //-------------Working with files
         public static void mainMenu_Base()          // Show main menu
         {
-            Console.WriteLine("1. Add\n2. Delete All\n3. See last\n4. Show\n9. Exit");
+            Console.WriteLine("1. Add\n2. Delete All\n3. See last\n4. Show\n0. Exit");
         }
         public static void seeLastOp_Base()         // Show last added record
         {

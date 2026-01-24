@@ -41,5 +41,7 @@ namespace Biblioteka_Projekt
         public static readonly string[] columnNames_Loans = { "Loan_id", "Reader_id", "Staff_id", "Book_id", "LoanDate", "Note"};
         public static readonly string[] columnNames_Payments = { "Payment_id", "Reader_id", "Amount", "PaymentDate"};
         public static readonly string[] columnNames_Recievings = { "Loan_id", "Staff_id", "RecievingDate", "Note"};
+        // Value of price per day for arrears
+        public const int arrearsRate = 2;
     }
 }
