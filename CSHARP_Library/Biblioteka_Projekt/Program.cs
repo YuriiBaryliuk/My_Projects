@@ -6,13 +6,12 @@ internal class Program
     private static void Main(string[] args)
     {
 //--------------------Using file Database--------------------//
-        /* 
+        /*
         ManagerBase<Reader> rm = new ReaderManager();
         ManagerBase<Book> bm = new BookManager();
         BaseMenu baseMenu = new BaseMenu(rm, bm);
         baseMenu.MainMenu();
         */
-
 //--------------------Using SQL Database--------------------//        
         SQLManager sqlManager = new SQLManager(MyConstants.connectionToMaster);
         
@@ -22,7 +21,6 @@ internal class Program
         }
         else
             Console.WriteLine("Not Proper Initialization");
-        
     }
 
 }

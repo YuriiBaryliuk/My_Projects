@@ -267,6 +267,9 @@ namespace Biblioteka_Projekt
                 return executeQuaeryWithReturn<int>(SQLCommandContainer.getMaxElement(MyConstants.tableName_Reader, MyConstants.columnNames_Reader[0]), "Can't get last element");
             else if (typeof(T) == typeof(Book))
                 return executeQuaeryWithReturn<int>(SQLCommandContainer.getMaxElement(MyConstants.tableName_Book, MyConstants.columnNames_Book[0]), "Can't get last element");
+            else if (typeof(T) == typeof(Staff))
+                return executeQuaeryWithReturn<int>(SQLCommandContainer.getMaxElement(MyConstants.tableName_Staff, MyConstants.columnNames_Staff[0]), "Can't get last element");
+            
             else return 0;
         }
 

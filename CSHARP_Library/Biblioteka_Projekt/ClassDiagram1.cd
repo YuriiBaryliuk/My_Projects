@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Program" Collapsed="true">
+    <Position X="13.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.StartMenu" Collapsed="true">
+    <Position X="13.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Menus\StartMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.StaffMenu" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="11.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAgQgAAABAAAgAAAAAEKQAAEMAAAQAAAAAAAAAAA=</HashCode>
+      <FileName>Menus\StaffMenu.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Biblioteka_Projekt.ManagerMenu" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="13.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAQgAAABAAAgAAAIAAAQAAEMAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>Menus\ManagerMenu.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Biblioteka_Projekt.BaseMenu" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="9.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAgAAACAAIgAAAAAAAQAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Menus\BaseMenu.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Biblioteka_Projekt.Address" Collapsed="true">
+    <Position X="8" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAAAEAAAEgAAIgAAAAAAAAAACAAAAAAAAAIA=</HashCode>
+      <FileName>Objects\Address.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.Book" Collapsed="true">
+    <Position X="11.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQgAAAAAAAAAAADQAAAAAAQAAAAAAAAAEAABAAAA=</HashCode>
+      <FileName>Objects\Book.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.Person" Collapsed="true">
+    <Position X="1.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EIABAAAAgAAAAIAEACAAAAAAAAAAAEAAAABgAAAAAAA=</HashCode>
+      <FileName>Objects\Person.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.Reader" Collapsed="true">
+    <Position X="0.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAIAAAAADAAAAAAAAAAAAAAAAAEAAAAAAA=</HashCode>
+      <FileName>Objects\Reader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.Staff" Collapsed="true">
+    <Position X="2.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Objects\Staff.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.InputCheck" Collapsed="true">
+    <Position X="13.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACQABIAAAAEEAQAAAIoAgAAMAAAAAIAAhQCQAEAAQ=</HashCode>
+      <FileName>Supportive\InputCheck.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.Logs" Collapsed="true">
+    <Position X="11.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Supportive\Logs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.MyReformatting" Collapsed="true">
+    <Position X="11.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Supportive\MyReformatting.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.ManagerBase&lt;T&gt;" Collapsed="true">
+    <Position X="1.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAAoAAAAAAAAAAAgAAgAAAQAAQAAAACA=</HashCode>
+      <FileName>Managers\ManagerBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Biblioteka_Projekt.ReaderManager" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAAIAAAAAAAAAAAAAAgAAAAAAQAAAACA=</HashCode>
+      <FileName>Managers\ReaderManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.BookManager" Collapsed="true">
+    <Position X="2.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAAIAAAAAAAAAAAAAAgAAAAAAQAAAACA=</HashCode>
+      <FileName>Managers\BookManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.SQLManager" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="9.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACEAgAEIAIAAgBAAQAAEAEACEQQgAAAQCAYBIAACA=</HashCode>
+      <FileName>Managers\SQLManager.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Biblioteka_Projekt.IOFileManager" Collapsed="true">
+    <Position X="9.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAGAAAAABAAAAAAAAAAAEAAAAAAAAAAAAAABgAQ=</HashCode>
+      <FileName>Managers\IOFileManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.InputManager" Collapsed="true">
+    <Position X="8" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQJAAAAAAAAACAAAAAACAQAQAAGAABAgCAAAQAAAA=</HashCode>
+      <FileName>Managers\InputManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.SQLCommandContainer" Collapsed="true">
+    <Position X="8" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAIAkBAAAAEIoAGBIAIAAAAACAAAAAgBAQCAABAAAEA=</HashCode>
+      <FileName>Containers\SQLCommandContainer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.MyConstants" Collapsed="true">
+    <Position X="9.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIRIAKAACBAAAAEAgUYAAQIAEAAAQAQMAEAAQAAQIAA=</HashCode>
+      <FileName>Containers\MyConstants.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Biblioteka_Projekt.MenuContainer" Collapsed="true">
+    <Position X="8" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAgAAoAAAMAAAAEAAE0gAkAAASABAkAAAAgAkAI=</HashCode>
+      <FileName>Containers\MenuContainer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Biblioteka_Projekt.IMenu" Collapsed="true">
+    <Position X="5.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAgAAAAAAAgAAAAAAAQAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Menus\IMenu.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Biblioteka_Projekt.ISQLMenu" Collapsed="true">
+    <Position X="5.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAABAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Menus\ISQLMenu.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Biblioteka_Projekt.IManager&lt;T&gt;" Collapsed="true">
+    <Position X="5.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAQAAAACA=</HashCode>
+      <FileName>Managers\IManager.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -84,11 +84,11 @@
             {
                 case "1":
                     Console.WriteLine("Show last reader");
-                    this.rm.getLastId<Reader>();
+                    this.rm.getLastMember().printData();
                     break;
                 case "2":
                     Console.WriteLine("Show last book");
-                    this.bm.getLastId<Book>();
+                    this.bm.getLastMember().printData();
                     break;
                 default:
                     break;

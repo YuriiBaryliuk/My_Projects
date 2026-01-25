@@ -14,7 +14,7 @@
         {
             Random rand = new Random();
             string password = "";
-            for(int i = 0; i < 10; ++i)
+            for(int i = 0; i < 5; ++i)
             {
                 int tempVal = rand.Next(0, 9);
                 password += tempVal.ToString();
@@ -24,7 +24,7 @@
         public void MainMenu()
         {
             Console.WriteLine("-------------Main Menu-------------");
-            MenuContainer.mainMenu_Staff();
+            MenuContainer.mainMenu_Manager();
             string? option = Console.ReadLine();
             switch (option)
             {
@@ -130,7 +130,7 @@
 
         public void Show()
         {
-            Console.Write("Show all staff members");
+            Console.WriteLine("Show all staff members");
             this.sqlManager.printTable(MyConstants.tableName_Staff, MyConstants.columnNames_Staff);
         }
 
