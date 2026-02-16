@@ -14,13 +14,15 @@ internal class Program
         */
 //--------------------Using SQL Database--------------------//        
         SQLManager sqlManager = new SQLManager(MyConstants.connectionToMaster);
-        
-        if (!sqlManager.getInitError()){
+
+        if (!sqlManager.getInitError())
+        {
             Console.WriteLine("Proper Initialization");
             StartMenu.StartingMenu(sqlManager);
         }
         else
             Console.WriteLine("Not Proper Initialization");
-    }
+        }
+        
 
 }

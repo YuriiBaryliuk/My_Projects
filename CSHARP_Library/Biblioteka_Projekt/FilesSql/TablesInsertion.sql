@@ -1,3 +1,4 @@
+--Inserting example data for database
 ALTER TABLE Genre NOCHECK CONSTRAINT ALL
 INSERT Genre (Genre_id, GenreName) VALUES (1, 'Fantasy')
 INSERT Genre (Genre_id, GenreName) VALUES (2, 'Science Fiction')

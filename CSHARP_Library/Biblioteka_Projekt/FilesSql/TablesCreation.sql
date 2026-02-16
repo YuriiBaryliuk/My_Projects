@@ -1,4 +1,5 @@
-﻿CREATE TABLE Genre(
+﻿--Creating all tables for database
+CREATE TABLE Genre(
 	Genre_id int NOT NULL,
 	GenreName nvarchar (50) NOT NULL,
 	CONSTRAINT PK_Genre PRIMARY KEY CLUSTERED

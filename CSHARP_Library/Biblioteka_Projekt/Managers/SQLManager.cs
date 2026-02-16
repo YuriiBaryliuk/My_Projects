@@ -5,9 +5,15 @@ namespace Biblioteka_Projekt
 {
     internal class SQLManager : IManager<Book>, IManager<Reader>
     {
-        private string m_connection;
+        private string m_connection;    // Saving string of connection
         private bool initError = false; // Database initialization error (true if Database was not initialized properly)
+        
+        // Method returns error if SQLManager initialization fails
         public bool getInitError() { return initError; }
+        
+        // Constructor is using to initialize SQLManager
+        // Initialization includes:
+
         public SQLManager(string connection)
         {
             m_connection = connection;

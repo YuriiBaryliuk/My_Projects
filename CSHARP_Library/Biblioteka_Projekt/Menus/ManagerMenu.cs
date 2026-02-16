@@ -139,7 +139,7 @@
             Console.WriteLine("Find staff member");
             MenuContainer.printColumns_FindStaff();
             string? option = Console.ReadLine();
-            int staffValue = InputManager.enterIntFindTarget();
+            string staffValue = InputManager.enterStringFindTarget();
             try{
                 switch (option)
                 {

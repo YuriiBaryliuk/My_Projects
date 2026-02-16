@@ -1,3 +1,4 @@
+--Checking if all the tables exests
 declare @allExist bit = 1;
 
 if not exists (select * from sysobjects where name = 'Arrears') 

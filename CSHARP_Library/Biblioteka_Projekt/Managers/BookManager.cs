@@ -1,12 +1,17 @@
-﻿// Manager for Files database to work with Book objects and files
+﻿// Manager for Book objects that works with file database for books
 namespace Biblioteka_Projekt
 {
     internal class BookManager : ManagerBase<Book>
     {
         public BookManager() : base(MyConstants.file_BooksDB)
-        {
+        {   
+            // Initialize inner register for books
+            // Register is List type
+            // Register is initialized from file database for books and will contain all books as a Book objects
             register = IOFileManager.initBookRegFromFileDB(pathToDB);
         }
+
+        // Method prints initialized register
         public override void printRegister()
         {
             if (register.Count != 0)
@@ -18,6 +23,8 @@ namespace Biblioteka_Projekt
                 Console.WriteLine("Books register is empty");
             }
         }
+
+        // Get last member from register list
         public override Book getLastMember()
         {
             if (register.Count != 0)
@@ -25,6 +32,9 @@ namespace Biblioteka_Projekt
             return null;
         }
 
+        // Method directs action of:
+        // (1) User input for adding a book
+        // (2) Saving it in a register (as a last member) and file database
         public override void inputAndSave<Book>()
         {
             try{
@@ -37,12 +47,14 @@ namespace Biblioteka_Projekt
             }
         }
 
+        // Deletes all books from the register and file DB
         public override void deleteAll<Book>()
         {
             this.register.Clear();
             IOFileManager.clearAllFile(pathToDB);
         }
 
+        // Gets an id of the last member in the register
         public override int getLastId<Book>()
         {
             if (register.Count != 0)

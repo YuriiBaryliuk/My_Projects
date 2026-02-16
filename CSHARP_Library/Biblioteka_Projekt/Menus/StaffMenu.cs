@@ -257,30 +257,30 @@
                 case MyConstants.tableName_Book:
                     if (getColumnIDUsingTable(MyConstants.tableName_Book, option) == 1 || getColumnIDUsingTable(MyConstants.tableName_Book, option) == 2)
                     {
-                        int bookValue = InputManager.enterIntFindTarget();
+                        int bookValue = InputManager.enterNum("Value to find");
                         this.sqlManager.findRecords<int>(tableName, columns, getColumnIDUsingTable(MyConstants.tableName_Book, option), bookValue);
                     }
                     else if (getColumnIDUsingTable(MyConstants.tableName_Book, option) == 3 || getColumnIDUsingTable(MyConstants.tableName_Book, option) == 4
                             || getColumnIDUsingTable(MyConstants.tableName_Book, option) == 5)
                     {
-                        int bookValue = InputManager.enterIntFindTarget();
+                        int bookValue = InputManager.enterNum("Value to find");
                         this.sqlManager.findRecords<int>(tableName, columns, getColumnIDUsingTable(MyConstants.tableName_Book, option), bookValue);
                     }
                     break;
                 case MyConstants.tableName_Loans:
-                    int loansValue = InputManager.enterIntFindTarget();
+                    int loansValue = InputManager.enterNum("Value to find");
                     this.sqlManager.findRecords<int>(tableName, columns, getColumnIDUsingTable(tableName, option), loansValue);
                     break;
                 case MyConstants.tableName_Receivings:
-                    int receivingValue = InputManager.enterIntFindTarget();
+                    int receivingValue = InputManager.enterNum("Value to find");
                     this.sqlManager.findRecords<int>(tableName, columns, getColumnIDUsingTable(tableName, option), receivingValue);
                     break;
                 case MyConstants.tableName_Genre:
-                    int genreValue = InputManager.enterIntFindTarget();
+                    int genreValue = InputManager.enterNum("Value to find");
                     this.sqlManager.findRecords<int>(tableName, columns, getColumnIDUsingTable(tableName, option), genreValue);
                     break;
                 case MyConstants.tableName_Payments:
-                    int paymentValue = InputManager.enterIntFindTarget();
+                    int paymentValue = InputManager.enterNum("Value to find");
                     this.sqlManager.findRecords<int>(tableName, columns, getColumnIDUsingTable(tableName, option), paymentValue);
                     break;
                 default:

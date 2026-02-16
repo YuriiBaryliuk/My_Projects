@@ -1,8 +1,13 @@
-﻿namespace Biblioteka_Projekt
+﻿// Static class is responsible for datastream from/to files
+namespace Biblioteka_Projekt
 {
     static internal class IOFileManager
     {
         //-----------------Readers-----------------//
+
+        // Method is connected with file-type database functionality
+        // Its purpose to read all information from file-type database and store everything in List
+        // Returns list with readed Reader objects
         public static List<Reader> initReaderRegFromFileDB(string path)
         {
             if (!File.Exists(path)){
@@ -48,11 +53,13 @@
             }
         }
 
+        // Writes log to file
         public static void writeLogToFile(string logDirectory, string log){
             string dateTimeOfLog = DateTime.Now.ToString();
             File.AppendAllText(logDirectory, "\n" + dateTimeOfLog + ": " + log);
         }
 
+        // Writes Reader to file
         public static void writeReaderToFile(string path, Reader reader)
         {
             string tempStr = "";
@@ -71,6 +78,9 @@
 
         //-----------------Books-----------------//
 
+        // Method is connected with file-type database functionality
+        // Its purpose to read all information from file-type database and store everything in List
+        // Returns list with readed Books objects
         public static List<Book> initBookRegFromFileDB(string path)
         {
             if (!File.Exists(path)){
@@ -110,6 +120,7 @@
             }
         }
 
+        // Writes Reader to file
         public static void writeBookToFile(string path, Book book)
         {
             string tempStr = "";
@@ -122,6 +133,10 @@
 
             File.AppendAllText(path, tempStr);
         }
+
+        // Special method that supports main function for reading from file
+        // File database contains "Key: Value" information
+        // This method drops keys returns only values
         private static string dropEntityKeys(string line) 
         {
             string[] keyAndValue = line.Split(":", 2);
@@ -129,8 +144,23 @@
             return value;
         }
 
+        // Method is used to clear all text from file
+        public static void clearAllFile(string path)
+        {
+            if (File.Exists(path))
+            {
+                File.WriteAllText(path, "");
+                Console.WriteLine("File was cleared");
+            }
+            else
+                Console.WriteLine("Can't find a file");
+        }
+
         //-------------SQL------------//
 
+        // Method is working with SQL part of code
+        // Purpose is to read command from resource file (Commonly from SQL file)
+        // Returns true if command was readed without errors
         public static bool readCommand(string fullResourceName, ref string command)
         {
             bool noException = true;
@@ -147,15 +177,6 @@
             return noException;
         }
 
-        public static void clearAllFile(string path)
-        {
-            if (File.Exists(path))
-            {
-                File.WriteAllText(path, "");
-                Console.WriteLine("File was cleared");
-            }
-            else
-                Console.WriteLine("Can't find a file");
-        }
+        
     }
 }

@@ -8,8 +8,8 @@ namespace Biblioteka_Projekt
 {
     internal class InputCheck
     {
-        const string regexNamePattern = @"^[A-Za-zŁŚŻąćęłńóśżź]+$";
-        const string regexSurnamePattern = @"^[A-Za-zĆŁŚŻąćęłńóśżź]{2,}$";
+        const string regexNamePattern = @"^[A-Za-zŁŚŻąćęłńóśżź]{1,70}$";
+        const string regexSurnamePattern = @"^[A-Za-zĆŁŚŻąćęłńóśżź]{2,70}$";
         const string regexStreetNamePattern = @"^[A-Za-z0-9ĆŁŚŻąćęłńóśżź\s,.\-/]{2,100}$";
         const string regexHouseFlatPattern = @"^[A-Za-z0-9ĆŁŚŻąćęłńóśżź]{1,10}$";
         const string regexPhonePattern = @"^\d{9}$";

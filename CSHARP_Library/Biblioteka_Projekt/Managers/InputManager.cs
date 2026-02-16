@@ -1,4 +1,7 @@
-﻿using System;
+﻿// This manager is responsible for user's input
+// It provides all necessary methods for input
+// Checks input directing it to appropriate instance
+using System;
 using System.Text;
 
 namespace Biblioteka_Projekt
@@ -6,8 +9,22 @@ namespace Biblioteka_Projekt
     internal class InputManager
     {
         //-----------------Readers-----------------//
+        // Method provides opportunity to enter Reader info and returning creating object (Reader)
         public static Reader InputReader()
         {
+            // 1. All necessary variables (needed to create Reader object) are created
+            // 2. Each of them is initialized. Initialization can differ:
+                
+                // - name, surname, phone (description/used class):
+                    // (1) Checking user input untill it will be right / InputCheck
+                    // (2) Using universal method (singleInputInit) - provide realization of user input / InputManager
+                    // (3) After correct input each is reformatted into appropriate form (e.g. first letter of name is converted to upper case) / MyReformatting
+                // - gender is initialized the same, except 3-rd step - its using char.ToUpper instead
+                // - address, dateOfBirth are using custom methods defined inside in InputManager
+
+            // 3. Returning Reader object created from listed variables
+
+           
             string name, surname;
             char gender;
             DateTime dateOfBirth;
@@ -25,6 +42,16 @@ namespace Biblioteka_Projekt
 
             return new Reader(name, surname, gender, dateOfBirth, address, phoneNumber, email, DateTime.Now);
         }
+        
+        // Univarsal method that is used to provide user's input functionality
+        // Parameters to pass:
+            // (1) String type - parameterName is the name of parameter is using for messages
+            // (2) Predicate<string> checking if the input is right
+        // Method working that way:
+            // - Using universal method (initAndCheckIfNull) initialize user's input
+            // - Check if value can pass using predicate
+            // - If user input is inappropriate - try again (realized using while loop)
+            // - If user input is appropriate - return inputted data
         private static string singleInputInit(string parameterName, Predicate<string> initValue)
         {
             string param;
@@ -41,6 +68,9 @@ namespace Biblioteka_Projekt
             return param;
         }
 
+        // Universal method that is used to return non-null user input
+        // Parameter is the name of what user need to provide (using for massages)
+        // User will be asked to write data until it will be not empty or not null
         private static string initAndCheckIfNull(string parameterName)
         {
             string? param;
@@ -60,6 +90,7 @@ namespace Biblioteka_Projekt
             return param;
         }
 
+        // Method to input user's date of birth
         private static DateTime inputReaderDate()
         {
             string? day, month, year;
@@ -90,7 +121,8 @@ namespace Biblioteka_Projekt
             }
             return new DateTime(Convert.ToInt16(year), Convert.ToInt16(month), Convert.ToInt16(day));
         }
-       
+        
+        // Method to input user's address
         private static Address inputReaderAddress()
         {
             string? streetName, houseNumber, flatNumber, city;
@@ -125,8 +157,21 @@ namespace Biblioteka_Projekt
         }
 
         //-----------------Books-----------------//
+        
+        // Method provides opportunity to enter Book info and returning creating object (Reader)
         public static Book InputBook()
         {
+        // 1. All necessary variables (needed to create Book object) are created
+        // 2. Each of them is initialized. Initialization can differ:
+                
+            // - author, title (description/used class):
+                // (1) Checking user input untill it will be right / InputCheck
+                // (2) Using universal method (singleInputInit) - provide realization of user input / InputManager
+                // (3) After correct input each is reformatted into appropriate form (e.g. first letter of title is converted to upper case) / MyReformatting
+            // - genre, yearOfRelease are using custom methods defined inside in InputManager
+            // - description initialized directly in this method
+
+        // 3. Returning Book object created from listed variables (including description if it is not null)
             string author, title;
             int yearOfRelease, genreID;
             string? description;
@@ -146,6 +191,7 @@ namespace Biblioteka_Projekt
             }
         }
 
+        // Method to input user's date of birth
         private static int initBookYear()
         {
             string bookYear;
@@ -164,6 +210,7 @@ namespace Biblioteka_Projekt
             return Convert.ToInt32(bookYear);
         }
 
+        // Method to input user's genre (ID)
         private static int initGenre()
         {
             string genreID;
@@ -183,9 +230,19 @@ namespace Biblioteka_Projekt
         }
 
         //--------------------STAFF------------------------
-
+        
+        // Method provides opportunity to enter Staff info and returning creating object (Staff)
         public static Staff inputStaff()
         {
+        // 1. All necessary variables (needed to create Staff object) are created
+        // 2. Each of them is initialized:
+                
+            // - name, surname, title (description/used class):
+                // (1) Checking user input untill it will be right / InputCheck
+                // (2) Using universal method (singleInputInit) - provide realization of user input / InputManager
+                // (3) After correct input each is reformatted into appropriate form (e.g. first letter of title is converted to upper case) / MyReformatting
+            
+        // 3. Returning Staff object created from listed variables
             string name, surname, title;
             
             Console.WriteLine("Enter Reader's data below");
@@ -198,6 +255,8 @@ namespace Biblioteka_Projekt
 
         //--------------------SQL--------------------------
 
+        // Method is used to provide functionality of inputs for loaning a book
+        // Returns dictionary with appropriate entered id's
         public static Dictionary<string, int> loanBook()
         {
             Dictionary<string, int> loanDict = new Dictionary<string, int>();
@@ -212,6 +271,8 @@ namespace Biblioteka_Projekt
             return loanDict;
         }
 
+        // Method is used to provide functionality of inputs for receiving a book
+        // Returns dictionary with appropriate entered id's
         public static Dictionary<string, int> receiveBook()
         {
             Dictionary<string, int> recDict = new Dictionary<string, int>();
@@ -223,20 +284,20 @@ namespace Biblioteka_Projekt
 
             return recDict;
         }
+
+        // Supportive method that returns ID (or any number) if user's input is correct
+        // Else returns zero
         public static int enterNum(string name = "ID")
         {
             string ID = initAndCheckIfNull(name);
             return InputCheck.checkIfNum(ID);
         }
+
+        // Supportive method that is used to input (and checking it) value, that user needs to find in database
         public static string enterStringFindTarget()
         {
             string value = initAndCheckIfNull("Value to find");
             return value;
-        }
-        public static int enterIntFindTarget()
-        {
-            string value = initAndCheckIfNull("Value to find");
-            return InputCheck.checkIfNum(value);
         }
     }
 }
