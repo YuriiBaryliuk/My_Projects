@@ -1,15 +1,19 @@
-﻿namespace Biblioteka_Projekt
+﻿// Main menu that is using IMenu interface
+// Implements menu options for working with file-type databases
+namespace Biblioteka_Projekt
 {
     internal class BaseMenu : IMenu
     {
+        // Has managers for file-type database as a members initialized in constructor
         ManagerBase<Reader> rm;
         ManagerBase<Book> bm;
-
         public BaseMenu(ManagerBase<Reader> rm, ManagerBase<Book> bm)
         {
             this.rm = rm;
             this.bm = bm;
         }
+
+        // Main menu method implementation for all options to choose
         public void MainMenu()
         {
             Console.WriteLine("-------------Main Menu-------------");
@@ -40,6 +44,7 @@
             MainMenu();
         }
 
+        // Add option implementing for adding objects into appropriate file-databases
         public void Add()
         {
             MenuContainer.addOp_Staff();
@@ -58,6 +63,8 @@
                     break;
             }
         }
+
+        // Delete all records option implementation for deleting all records from database
         public void DeleteAll()
         {
             MenuContainer.deleteOp_Staff();
@@ -76,6 +83,8 @@
                     break;
             }
         }
+
+        // See last added member option implementation to print information about last added object
         public void SeeLast()
         {
             MenuContainer.seeLastOp_Base();
@@ -94,6 +103,8 @@
                     break;
             }
         }
+
+        // Show option implementation to print all objects from database
         public void Show()
         {
             MenuContainer.showAllOp_Base();

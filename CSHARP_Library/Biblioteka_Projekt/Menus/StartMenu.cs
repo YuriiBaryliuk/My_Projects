@@ -1,7 +1,9 @@
-﻿namespace Biblioteka_Projekt
+﻿// Special class created for showing starting menu when program is starting running
+namespace Biblioteka_Projekt
 {
     internal static class StartMenu
     {
+        // Method gives user options to choose a type of logging in
         public static void StartingMenu(SQLManager sqlManager)
         {
             Console.WriteLine("Log in as\n1. Staff\n2. Manager");
@@ -26,6 +28,8 @@
                     break;
             }
         }
+
+        // Inner method that checks if the Manager's password is correct
         private static bool checkPassword(ManagerMenu managerMenu)
         {
             Console.Write("Enter password: ");

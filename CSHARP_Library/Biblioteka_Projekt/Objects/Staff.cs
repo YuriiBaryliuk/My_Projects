@@ -1,4 +1,10 @@
-﻿namespace Biblioteka_Projekt
+﻿// Staff type of data that represent staff
+// Inherited from Person
+// Has 1 member that stores title of the worker
+// Has 1 method
+// Has 1 constructor
+
+namespace Biblioteka_Projekt
 {
     internal class Staff : Person
     {

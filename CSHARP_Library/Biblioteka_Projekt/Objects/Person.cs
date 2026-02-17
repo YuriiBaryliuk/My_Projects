@@ -1,4 +1,18 @@
-﻿using System;
+﻿// Person type of data that represent person
+// Has 7 members that store:
+    // Name,
+    // Surname,
+    // Gender,
+    // Date of birth,
+    // Age,
+    // Address,
+    // Phone
+    // Email
+    
+// Has 2 methods
+// Has 2 constructors
+
+using System;
 using System.Text;
 
 namespace Biblioteka_Projekt

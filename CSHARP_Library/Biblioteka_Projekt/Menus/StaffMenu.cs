@@ -1,12 +1,19 @@
-﻿namespace Biblioteka_Projekt
+﻿// Main menu created for Staff members of the library
+// It includes options that Staff can use
+namespace Biblioteka_Projekt
 {
     internal class StaffMenu : ISQLMenu
     {
+        // Has SQLManager as a member
         public SQLManager sqlManager { get; private set; }
+
+        // Initialize using SQLManager
         public StaffMenu(SQLManager sqlManager)
         {
             this.sqlManager = sqlManager;
         }
+
+        // Main menu method implementation for all options to choose
         public void MainMenu()
         {
             Console.WriteLine("-------------Main Menu-------------");
@@ -56,6 +63,8 @@
             }
             MainMenu();
         }
+
+        // Add option implementation for adding objects into table of SQL database
         public void Add()
         {
             MenuContainer.addOp_Staff();
@@ -74,6 +83,8 @@
                     break;
             }
         }
+
+        // Menu for deleting single record
         public void Delete()
         {
             MenuContainer.deleteOp_Staff();
@@ -93,16 +104,19 @@
             }
         }
 
+        // Inner method that launches loan book functionality
         private void Loan()
         {
             this.sqlManager.loanBook();
         }
 
+        // Inner method that launches receiving book functionality
         private void Receive()
         {
             this.sqlManager.ReceiveBook();
         }
 
+        // See last added member option implementation to print information about last added object
         public void SeeLast()
         {
             MenuContainer.seeLastOp_Staff();
@@ -122,6 +136,7 @@
             }
         }
 
+        // Show option implementation to print all objects from table
         public void Show()
         {
             MenuContainer.showOp_Staff();
@@ -173,6 +188,7 @@
             }
         }
 
+        // Show records with order option implementation to show a table with some ordering
         public void ShowWithOrder(string tableName, string[] columns)
         {
             Console.WriteLine("Show this table in order?");
@@ -193,6 +209,7 @@
             }
         }
 
+        // Inner method that supports ShowWithOrder method
         private void ShowTableWithOrder(string tableName, string[] columnNames, bool ascending = true)
         {
             Console.WriteLine("Choose ordering column");
@@ -203,6 +220,7 @@
             else Console.WriteLine("You choosed wrong column");
         }
 
+        // Find record option implementation to find record from a table
         public void Find()
         {
             MenuContainer.showOp_Staff();
@@ -243,6 +261,10 @@
                 Logs.writeLog(e.Message);
             }
         }
+
+        // Two inner mthods that extend functionality of Find method:
+
+        // Inner method that supports Find method
         private void findValueByColumn(string tableName, string[] columns)
         {
             string? option = Console.ReadLine();
@@ -288,6 +310,7 @@
             }
         }
 
+        // Inner method that supports another inner method - findValueByColumn
         private int getColumnIDUsingTable(string tableName, string option)
         {
             if(tableName == MyConstants.tableName_Reader)
@@ -355,6 +378,7 @@
             return 1;
         }
 
+        // Find record option implementation to find record from a table by ID
         public void FindByID()
         {
             MenuContainer.showOp_Staff();
@@ -390,11 +414,14 @@
             }
         }
 
+        // Inner method, created for main menu. Directs operation processing for arrears calculation
         private void CalculateArrears()
         {
             int ID = InputManager.enterNum();
             this.sqlManager.calculateArrears(ID);
         }
+
+        // Method inherited from interface, but can't be used for Staff members
         public void DeleteAll(){ }
     }
 }

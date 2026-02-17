@@ -1,4 +1,16 @@
-﻿using System;
+﻿// Book type of data that represent book
+// Has 7 members that store:
+    // Next book id (special counter for IDs),
+    // Book ID,
+    // Author name,
+    // Book title,
+    // Year of book release,
+    // Genre ID,
+    // Description of a book
+// Has 1 method
+// Has 1 constructor
+
+using System;
 using System.Text;
 
 namespace Biblioteka_Projekt

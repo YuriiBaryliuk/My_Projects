@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Class provides functionality to write logs
+
+using System;
 using System.Text;
 
 namespace Biblioteka_Projekt

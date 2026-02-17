@@ -1,4 +1,6 @@
-﻿using System.Reflection.PortableExecutable;
+﻿// Supportive class that returns appropriate format of strings to save in database
+
+using System.Reflection.PortableExecutable;
 
 namespace Biblioteka_Projekt
 {

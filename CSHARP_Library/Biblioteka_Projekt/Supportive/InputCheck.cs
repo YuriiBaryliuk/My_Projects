@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Class is using to CHECK data input
+using System;
 using System.Globalization;
 using System.Numerics;
 using System.Text;

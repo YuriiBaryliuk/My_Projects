@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿// Main manager for working with SQL Database
+using Microsoft.Data.SqlClient;
 using System.IO;
 
 namespace Biblioteka_Projekt
@@ -11,9 +12,12 @@ namespace Biblioteka_Projekt
         // Method returns error if SQLManager initialization fails
         public bool getInitError() { return initError; }
         
-        // Constructor is using to initialize SQLManager
+        // Constructor is used to initialize SQLManager
         // Initialization includes:
-
+            // 1. Checking database existion
+            // 2. Checking tables existion
+            // 3. Updating arrears information
+            // 4. Creating database, tables, example data, if database doesn't exist
         public SQLManager(string connection)
         {
             m_connection = connection;
@@ -63,10 +67,15 @@ namespace Biblioteka_Projekt
             return false;
         }
 
+        // Updating arrears data (delete existing table and create new)
         private bool updateArrears()
         {
             return executeQuaery(SQLCommandContainer.updateArrears(), "Can't update arrears");
         }
+
+        // Universal method to execute SQL query
+        // Takes command context and message for logs
+        // Returns true if query was executed correctly
         private bool executeQuaery(string command, string message = "Message")  // true if everything is okay
         {
             try
@@ -88,6 +97,10 @@ namespace Biblioteka_Projekt
             }
             return true;
         }
+
+        // Universal method to execute SQL query
+        // Takes command context and message for logs
+        // Returns T type value if query was executed correctly or returns default value if query wasn't executed correctly
         private T executeQuaeryWithReturn<T>(string command, string message = "Message")
         {
             T myVariable = default(T);
@@ -109,6 +122,8 @@ namespace Biblioteka_Projekt
             
         }
 
+        // Directs functionality of inputting and saving
+        // Works only with: Reader, Book, Staff types
         public void inputAndSave<T>()
         {
             if (typeof(T) == typeof(Reader))
@@ -124,6 +139,7 @@ namespace Biblioteka_Projekt
             }
         }
 
+        // Adds Reader to database
         private void insertReader(Reader r, string message = "Can't insert a reader")
         {
             try{
@@ -151,6 +167,7 @@ namespace Biblioteka_Projekt
             }
         }
 
+        // Adds Book to database
         private void insertBook(Book b, string message = "Can't insert a book")
         {
             try{
@@ -174,6 +191,7 @@ namespace Biblioteka_Projekt
             }
         }
 
+        // Adds staff to database
         private void insertStaff(Staff s, string message = "Can't insert a staff member")
         {
             try{
@@ -194,6 +212,9 @@ namespace Biblioteka_Projekt
                 Console.WriteLine(message);
             }
         }
+
+        // Deletes all records from the table
+        // Works only with: Reader, Book, Staff types
         public void deleteAll<T>()
         {
             if (typeof(T) == typeof(Reader))
@@ -218,6 +239,10 @@ namespace Biblioteka_Projekt
                 executeQuaery(SQLCommandContainer.deleteAllRows(MyConstants.tableName_Staff), "Can't delete Staff members");
             }
         }
+
+        // Deletes one record from table
+        // Works only with: Reader, Book, Staff types
+        // Checks if delete can be complited
         public void deleteRecord<T>(int ID)
         {
             try{
@@ -248,6 +273,7 @@ namespace Biblioteka_Projekt
             }
         }
 
+        // Directs book loaning
         public void loanBook()
         {
             Dictionary<string, int> loanDict = InputManager.loanBook();
@@ -258,6 +284,8 @@ namespace Biblioteka_Projekt
             if (executeQuaery(SQLCommandContainer.loanBook(loanDict, string.IsNullOrEmpty(description) ? "-" : description), "Can't process operation"))
                 insertValueIntoTable<int>(executeQuaeryWithReturn<int>(SQLCommandContainer.getMaxElement(MyConstants.tableName_Loans, MyConstants.columnNames_Loans[0]), "Can't add book to currently loaned books"), MyConstants.tableName_CurrentlyLoaned);
         }
+
+        // Directs book receiving
         public void ReceiveBook()
         {
             Dictionary<string, int> recDict = InputManager.receiveBook();
@@ -267,6 +295,8 @@ namespace Biblioteka_Projekt
                 executeQuaery(SQLCommandContainer.deleteRecord(recDict[MyConstants.columnNames_Loans[0]], MyConstants.tableName_CurrentlyLoaned, MyConstants.columnNames_Loans[0]), "Can't receive a book");
         }
 
+        // Returns ID of last added object
+        // Works only with: Reader, Book, Staff types
         public int getLastId<T>()
         {
             if (typeof(T) == typeof(Reader))
@@ -279,11 +309,19 @@ namespace Biblioteka_Projekt
             else return 0;
         }
 
+        // Inner method: inserts value into table
         private bool insertValueIntoTable<T>(T value, string tableName)
         {
             return executeQuaery(SQLCommandContainer.insertValueIntoTable<T>(value, tableName), "Can't insert a record");
         }
 
+        // Prints table
+        // Parameters:
+            // 1. tableName     -- name of the table to print
+            // 2. columnNames   -- list of names of columns of a table (can be found in constants)
+            // 3. orderBy       -- ordering method (default 0 - order using first column)
+            // 4. ascending     -- bool value (true on default) ordering ascending (1), descending (0) 
+            // 5. message       -- negative message for logs
         public void printTable(string tableName, string[] columnNames, int orderBy = 0, bool ascending = true, string message = "Can't read data from a table")
         {
             try
@@ -315,6 +353,13 @@ namespace Biblioteka_Projekt
             }
         }
 
+        // Method to find record in the table
+        // Parameters:
+            // 1. tableName     -- name of the table to print
+            // 2. columnNames   -- list of names of columns of a table (can be found in constants)
+            // 3. columnID      -- ID of column in which value is placed
+            // 4. value         -- value of type T that user wants to find 
+            // 5. message       -- negative message for logs
         public void findRecords<T>(string tableName, string[] columnNames, int columnID, T value, string message = "Can't find a record")
         {
             try
@@ -357,6 +402,13 @@ namespace Biblioteka_Projekt
                 Console.WriteLine(message);
             }
         }
+
+        // Finding record by ID
+        // Parameters:
+            // 1. tableName     -- name of the table to print
+            // 2. columnNames   -- list of names of columns of a table (can be found in constants)
+            // 3. ID            -- ID of the value to find
+            // 4. message       -- negative message for logs
         public void findRecordByID(string tableName, string[] columnNames, int ID, string message = "Can't find a record")
         {
             try
@@ -389,6 +441,9 @@ namespace Biblioteka_Projekt
             }
         }
 
+        // Method calculates arrer days for reader with ID as a parameter and prints info about it:
+        // 1. Reader has no arrears
+        // 2. Reader has arrears (zł)
         public void calculateArrears(int ID, string message = "Can't calculate belongings")
         {
             try{

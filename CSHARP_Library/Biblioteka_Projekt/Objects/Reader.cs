@@ -1,4 +1,14 @@
-﻿using System;
+﻿// Reader type of data that represent reader
+// Inherited from Person
+// Has 3 members that store:
+    // Next reader id (special counter for IDs),
+    // Reader ID,
+    // Date of registration
+    
+// Has 1 method
+// Has 1 constructor
+
+using System;
 using System.Text;
 
 namespace Biblioteka_Projekt

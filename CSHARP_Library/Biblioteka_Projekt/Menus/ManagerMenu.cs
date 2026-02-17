@@ -1,15 +1,23 @@
-﻿namespace Biblioteka_Projekt
+﻿// Main menu created for Manager of the library
+// It includes some options that aren't in menu provided for Staff members (e.g. Staff processing)
+namespace Biblioteka_Projekt
 {
     internal class ManagerMenu : ISQLMenu
     {
+        // Has imitation of password for Manager
         public string password{ get; private set; }
+
+        // Has SQLManager as a member
         SQLManager sqlManager;
+
+        // Initialize using SQLManager and inner method to create password (for example purpose)
         public ManagerMenu(SQLManager sqlManager)
         {
             this.password = getPassword();
             this.sqlManager = sqlManager;
         }
 
+        // Generates password for Manager
         private string getPassword()
         {
             Random rand = new Random();
@@ -21,6 +29,8 @@
             }
             return password;
         }
+
+        // Main menu method implementation for all options to choose
         public void MainMenu()
         {
             Console.WriteLine("-------------Main Menu-------------");
@@ -63,6 +73,7 @@
             MainMenu();
         }
 
+        // Add option implementation for adding objects into table of SQL database
         public void Add()
         {
             MenuContainer.addOp_Manager();
@@ -78,6 +89,7 @@
             }
         }
 
+        // Menu for deleting single record
         public void Delete()
         {
             MenuContainer.deleteOp_Manager();
@@ -93,6 +105,7 @@
             }
         }
 
+        // Delete all records option implementation for deleting all records from a table
         public void DeleteAll()
         {
             MenuContainer.deleteAll_Manager();
@@ -113,6 +126,7 @@
             }
         }
 
+        // See last added member option implementation to print information about last added object
         public void SeeLast()
         {
             MenuContainer.seeLastOp_Manager();
@@ -128,12 +142,14 @@
             }
         }
 
+        // Show option implementation to print all objects from table
         public void Show()
         {
             Console.WriteLine("Show all staff members");
             this.sqlManager.printTable(MyConstants.tableName_Staff, MyConstants.columnNames_Staff);
         }
 
+        // Find record option implementation to find record from a table
         public void Find()
         {
             Console.WriteLine("Find staff member");
@@ -162,12 +178,14 @@
             }
         }
 
+        // Find record option implementation to find record from a table by ID
         public void FindByID()
         {
             int ID = InputManager.enterNum();
             this.sqlManager.findRecordByID(MyConstants.tableName_Staff, MyConstants.columnNames_Staff, ID);
         }
 
+        // Show records with order option implementation to show a table with some ordering
         public void ShowWithOrder(string tableName, string[] columns){ }
     }
 }
