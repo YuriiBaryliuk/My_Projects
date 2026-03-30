@@ -1,0 +1,84 @@
+import asyncio
+import xml.etree.ElementTree as ET
+import aiohttp
+import pandas as pd
+
+async def fetch_xml(session, url):
+    async with session.get(url) as response:
+        response.raise_for_status()
+        return await response.text()
+
+
+async def get_products(xml_url: str):
+    async with aiohttp.ClientSession() as session:
+        xml_data = await fetch_xml(session, xml_url)
+
+        root = ET.fromstring(xml_data)
+
+        products_list = []
+        variants_list = []
+
+        for product in root.findall('product'):
+            # Extract from <product>
+            product_id = product.find('product-id').text
+            product_name = product.find('product-name').text
+            price = float(product.find('price').text) if product.find('price').text else None
+            inventory = int(product.find('inventory-count').text) if product.find('inventory-count').text else 0
+
+            #Extract from <extras>
+            extras = product.find('extras')
+            producer = extras.find('producer').text if extras.find('producer') is not None else None
+            wine_name = extras.find('wine-name').text if extras.find('wine-name') is not None else None
+            vintage = extras.find('vintage').text if extras.find('vintage') is not None else None
+            country = extras.find('country').text if extras.find('country') is not None else None
+            color = extras.find('color').text if extras.find('color') is not None else None
+            description = extras.find('description').text if extras.find('description') is not None else ""
+            varietal = extras.find('varietal').text if extras.find('varietal') is not None else None
+            image = extras.find('image').text if extras.find('image') is not None else None
+
+            bottle_size = product.find('bottle_size').text if product.find('bottle_size') is not None else None
+            link = product.find('link').text if product.find('link') is not None else None
+
+            title = product_name
+            article_id = f"WINE_{product_id}"
+
+
+            products_list.append({
+                'article_id': article_id,
+                'title': title,
+                'productType': 'Wine',
+                'vendor': producer,
+                'descriptionHtml': description,
+                'images': image,
+                'country': country,
+                'color': color,
+                'varietal': varietal,
+                'vintage': vintage,
+                'wine_name': wine_name,
+                'bottle_size': bottle_size,
+                'link': link
+            })
+
+
+            variants_list.append({
+                'article_id': article_id,
+                'SKU': product_id,
+                'barcode': None,
+                'title': title,
+                'cost': price,
+                'availableQuantity': inventory,
+                'media_originalSource': image,
+                'bottle_size': bottle_size,
+                'vintage': vintage
+            })
+
+        # Create DataFrames
+        products_df = pd.DataFrame(products_list)
+        variants_df = pd.DataFrame(variants_list)
+
+        print(products_df)
+        print(variants_df)
+
+        return products_df, variants_df
+
+asyncio.run(get_products("https://weinshop365.ch/shop_utils/vivino_feed_ger.xml"))
