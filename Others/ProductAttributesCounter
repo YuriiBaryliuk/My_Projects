@@ -71,6 +71,7 @@ query ProductWithVariants($id: ID!, $first: Int = 50, $after: String) {
           title
           price
           compareAtPrice
+          inventoryQuantity
           inventoryItem {
             unitCost {
               amount
@@ -188,6 +189,7 @@ def get_variants_for_product(product_id):
         for edge in connection["edges"]:
             node = edge["node"]
             variant_have_image = len(edge["node"]["media"]["edges"]) > 0
+            variant_in_inventory = edge["node"]["inventoryQuantity"] > 0
             inventory_item = node["inventoryItem"]
             unit_cost = None
 
@@ -198,7 +200,8 @@ def get_variants_for_product(product_id):
                 "have_image": variant_have_image,
                 "price": node["price"],
                 "compare_at_price": node["compareAtPrice"],
-                "unit_cost": unit_cost
+                "unit_cost": unit_cost,
+                "in_inventory": variant_in_inventory,
             })
 
         if not connection["pageInfo"]["hasNextPage"]:
@@ -216,6 +219,7 @@ excel_list_variants_no_images = []
 excel_list_variants_no_price = []
 excel_list_variants_no_compare_at_price = []
 excel_list_variants_no_unit_cost = []
+excel_list_variants_in_inventory = []
 
 collections = get_all_collections()
 print("Number of collections:", len(collections))
@@ -230,7 +234,6 @@ for collection in collections:
     # Quantity
     print("Quantity:", len(products))
 
-
     if not products:
         print("  (No products in this collection)")
 
@@ -242,6 +245,7 @@ for collection in collections:
         excel_list_variants_no_price.append(0)
         excel_list_variants_no_compare_at_price.append(0)
         excel_list_variants_no_unit_cost.append(0)
+        excel_list_variants_in_inventory.append(0)
 
         continue
 
@@ -267,6 +271,7 @@ for collection in collections:
     variant_price_counter = 0
     variant_compareAtPrice_counter = 0
     variant_unitCost_counter = 0
+    variant_inventory_quantity_counter = 0
     for product in products:
         variants = get_variants_for_product(product["id"])
         variants_length = len(variants)
@@ -280,19 +285,23 @@ for collection in collections:
                 variant_compareAtPrice_counter += 1
             if not variant["unit_cost"]:
                 variant_unitCost_counter += 1
+            if variant["in_inventory"]:
+                variant_inventory_quantity_counter += 1
 
 
     print(f"Variants quantity: {variant_quantity_counter}\n"
           f"No images for variants: {variant_image_counter}\n"
           f"No price: {variant_price_counter}\n"
           f"No compareAtPrice: {variant_compareAtPrice_counter}\n"
-          f"No unitCost: {variant_unitCost_counter}")
+          f"No unitCost: {variant_unitCost_counter}\n"
+          f"Are in inventory: {variant_inventory_quantity_counter}")
 
     excel_list_variants_quantity.append(variant_quantity_counter)
     excel_list_variants_no_images.append(variant_image_counter)
     excel_list_variants_no_price.append(variant_price_counter)
     excel_list_variants_no_compare_at_price.append(variant_compareAtPrice_counter)
     excel_list_variants_no_unit_cost.append(variant_unitCost_counter)
+    excel_list_variants_in_inventory.append(variant_inventory_quantity_counter)
 
 print(excel_list_quantity)
 print(excel_list_no_description)
@@ -302,6 +311,7 @@ print(excel_list_variants_no_images)
 print(excel_list_variants_no_price)
 print(excel_list_variants_no_compare_at_price)
 print(excel_list_variants_no_unit_cost)
+print(excel_list_variants_in_inventory)
 
 
 df = pd.DataFrame({
@@ -313,7 +323,8 @@ df = pd.DataFrame({
     "VariantsNoImages": excel_list_variants_no_images,
     "VariantsNoPrice": excel_list_variants_no_price,
     "VariantsNoCompareAtPrice": excel_list_variants_no_compare_at_price,
-    "VariantsNoUnitCost": excel_list_variants_no_unit_cost
+    "VariantsNoUnitCost": excel_list_variants_no_unit_cost,
+    "VariantsInInventory": excel_list_variants_in_inventory
 })
 
 df.to_excel("quantities.xlsx", index=False)
