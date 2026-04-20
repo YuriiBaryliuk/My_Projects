@@ -1,1 +1,129 @@
-New
+# routers/order.py
+
+from datetime import datetime
+from schemas.b2b_order import FinancialStatusEnum
+
+# ============ REFUND ============
+@router.patch('/order/{order_id}/refund', dependencies=[Depends(authenticate_user)])
+async def refund_order(order_id: int, 
+                       amount: float = Query(..., gt=0),
+                       reason: str = Query(None),
+                       shopify_account_id: int = Header(...)):
+    """Refund an order"""
+    order = await AsyncORM.get_by_id(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    await AsyncORM.update_record(Order, order_id, {
+        "financial_status": FinancialStatusEnum.REFUNDED.value if amount >= order.total_price else FinancialStatusEnum.PARTIALLY_REFUNDED.value,
+        "refund_reason": reason,
+        "refund_amount": amount,
+        "refund_date": datetime.utcnow(),
+    })
+    return {"status": "refunded", "order_id": order_id}
+
+
+# ============ MARK DUPLICATE ============
+@router.patch('/order/{order_id}/mark-duplicate', dependencies=[Depends(authenticate_user)])
+async def mark_duplicate(order_id: int,
+                         original_order_id: int = Query(...),
+                         shopify_account_id: int = Header(...)):
+    """Mark order as duplicate of another"""
+    order = await AsyncORM.get_by_id(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    await AsyncORM.update_record(Order, order_id, {
+        "is_duplicate": True,
+        "original_order_id": original_order_id,
+    })
+    return {"status": "marked_duplicate", "order_id": order_id}
+
+
+# ============ CANCEL ORDER ============
+@router.patch('/order/{order_id}/cancel', dependencies=[Depends(authenticate_user)])
+async def cancel_order(order_id: int,
+                       reason: str = Query(None),
+                       shopify_account_id: int = Header(...)):
+    """Cancel an order"""
+    order = await AsyncORM.get_by_id(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    if order.fulfillment_status == "FULFILLED":
+        raise HTTPException(status_code=400, detail="Cannot cancel fulfilled order")
+    
+    await AsyncORM.update_record(Order, order_id, {
+        "fulfillment_status": "CANCELLED",
+        "financial_status": FinancialStatusEnum.VOIDED.value,
+        "cancellation_reason": reason,
+        "cancelled_at": datetime.utcnow(),
+    })
+    return {"status": "cancelled", "order_id": order_id}
+
+
+# ============ ARCHIVE ORDER ============
+@router.patch('/order/{order_id}/archive', dependencies=[Depends(authenticate_user)])
+async def archive_order(order_id: int,
+                        reason: str = Query(None),
+                        shopify_account_id: int = Header(...)):
+    """Archive an order"""
+    order = await AsyncORM.get_by_id(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    await AsyncORM.update_record(Order, order_id, {
+        "is_archived": True,
+        "archived_at": datetime.utcnow(),
+    })
+    return {"status": "archived", "order_id": order_id}
+
+
+# ============ UNARCHIVE ORDER ============
+@router.patch('/order/{order_id}/unarchive', dependencies=[Depends(authenticate_user)])
+async def unarchive_order(order_id: int, shopify_account_id: int = Header(...)):
+    """Unarchive an order"""
+    order = await AsyncORM.get_by_id(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    await AsyncORM.update_record(Order, order_id, {
+        "is_archived": False,
+        "archived_at": None,
+    })
+    return {"status": "unarchived", "order_id": order_id}
+
+
+# ============ GET ARCHIVED ORDERS ============
+@router.get('/orders/archived', dependencies=[Depends(authenticate_user)])
+async def get_archived_orders(page: int = Query(1, ge=1),
+                              size: int = Query(10, ge=1),
+                              shopify_account_id: int = Header(...)):
+    """Get all archived orders"""
+    filters = {"is_archived": True, "shopify_account_id": shopify_account_id}
+    offset = (page - 1) * size
+    
+    return await AsyncORM.get_records_with_filters(
+        model=Order,
+        filters=filters,
+        offset=offset,
+        limit=size,
+        sort_by=[("archived_at", "desc")]
+    )
+
+
+# ============ GET DUPLICATE ORDERS ============
+@router.get('/orders/duplicates', dependencies=[Depends(authenticate_user)])
+async def get_duplicate_orders(page: int = Query(1, ge=1),
+                               size: int = Query(10, ge=1),
+                               shopify_account_id: int = Header(...)):
+    """Get all duplicate orders"""
+    filters = {"is_duplicate": True, "shopify_account_id": shopify_account_id}
+    offset = (page - 1) * size
+    
+    return await AsyncORM.get_records_with_filters(
+        model=Order,
+        filters=filters,
+        offset=offset,
+        limit=size
+    )
