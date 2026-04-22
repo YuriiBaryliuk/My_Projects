@@ -1,0 +1,387 @@
+async def refund_order(
+    self,
+    order_id: int,
+    reason: Optional[str] = None,
+    note: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Initiates a refund for the specified order.
+    
+    Args:
+        order_id: The Shopify order ID
+        reason: Optional reason for the refund
+        note: Optional note for the refund
+        
+    Returns:
+        Dictionary containing refund_id and message
+    """
+    order_gid = f"gid://shopify/Order/{order_id}"
+    
+    mutation = """
+    mutation($input: RefundInput!) {
+      refundCreate(input: $input) {
+        refund {
+          id
+          createdAt
+          status
+          note
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    """
+    
+    variables = {
+        "input": {
+            "orderId": order_gid,
+            "note": note or reason or ""
+        }
+    }
+    
+    data = {"query": mutation, "variables": variables}
+    resp, _ = await self.client._requestAsync("POST", "/graphql.json", data=data)
+    
+    if "errors" in resp or (resp.get("data", {}).get("refundCreate", {}).get("userErrors")):
+        errors = resp.get("errors", [])
+        user_errors = resp.get("data", {}).get("refundCreate", {}).get("userErrors", [])
+        error_messages = [e.get("message", str(e)) for e in errors + user_errors]
+        raise Exception(f"Failed to refund order: {', '.join(error_messages)}")
+    
+    refund = resp.get("data", {}).get("refundCreate", {}).get("refund", {})
+    refund_id = refund.get("id", "").split("/")[-1] if refund.get("id") else None
+    
+    return {
+        "refund_id": refund_id,
+        "message": f"Refund initiated successfully for order {order_id}"
+    }
+
+
+async def duplicate_order(
+    self,
+    order_id: int,
+    include_line_items: bool = True,
+    include_shipping: bool = True
+) -> Dict[str, Any]:
+    """
+    Creates a duplicate of the specified order as a draft order.
+    
+    Args:
+        order_id: The Shopify order ID to duplicate
+        include_line_items: Whether to include line items in the duplicate
+        include_shipping: Whether to include shipping information
+        
+    Returns:
+        Dictionary containing new_order_id, draft_order_id and message
+    """
+    # First, fetch the original order details
+    order_gid = f"gid://shopify/Order/{order_id}"
+    
+    order_query = f"""
+    query($id: ID!) {{
+      node(id: $id) {{
+        ... on Order {{
+          id
+          email
+          customer {{
+            id
+            email
+            firstName
+            lastName
+            defaultAddress {{
+              address1
+              address2
+              city
+              company
+              countryCode
+              firstName
+              lastName
+              phone
+              provinceCode
+              zip
+            }}
+          }}
+          billingAddress {{
+            address1
+            address2
+            city
+            company
+            countryCode
+            firstName
+            lastName
+            phone
+            provinceCode
+            zip
+          }}
+          shippingAddress {{
+            address1
+            address2
+            city
+            company
+            countryCode
+            firstName
+            lastName
+            phone
+            provinceCode
+            zip
+          }}
+          lineItems(first: 100) {{
+            edges {{
+              node {{
+                id
+                title
+                quantity
+                variant {{
+                  id
+                  title
+                }}
+                originalUnitPriceSet {{
+                  shopMoney {{
+                    amount
+                    currencyCode
+                  }}
+                }}
+              }}
+            }}
+          }}
+          shippingLines(first: 20) {{
+            edges {{
+              node {{
+                title
+                originalPriceSet {{
+                  shopMoney {{
+                    amount
+                    currencyCode
+                  }}
+                }}
+              }}
+            }}
+          }}
+          currencyCode
+        }}
+      }}
+    }}
+    """
+    
+    variables = {"id": order_gid}
+    data = {"query": order_query, "variables": variables}
+    resp, _ = await self.client._requestAsync("POST", "/graphql.json", data=data)
+    
+    if "errors" in resp:
+        errors = resp.get("errors", [])
+        error_messages = [e.get("message", str(e)) for e in errors]
+        raise Exception(f"Failed to fetch order: {', '.join(error_messages)}")
+    
+    order_node = resp.get("data", {}).get("node")
+    if not order_node:
+        raise Exception(f"Order {order_id} not found")
+    
+    # Prepare draft order input
+    line_items = []
+    if include_line_items:
+        for edge in order_node.get("lineItems", {}).get("edges", []):
+            node = edge.get("node", {})
+            line_items.append({
+                "variantId": node.get("variant", {}).get("id"),
+                "quantity": node.get("quantity", 1),
+                "customPrice": node.get("originalUnitPriceSet", {}).get("shopMoney", {}).get("amount")
+            })
+    
+    draft_order_input = {
+        "lineItems": line_items,
+        "email": order_node.get("email"),
+        "billingAddress": order_node.get("billingAddress") if order_node.get("billingAddress") else None,
+        "shippingAddress": order_node.get("shippingAddress") if order_node.get("shippingAddress") else None,
+        "customAttributes": [
+            {
+                "key": "duplicated_from_order",
+                "value": str(order_id)
+            }
+        ]
+    }
+    
+    # Create draft order mutation
+    create_mutation = """
+    mutation($input: DraftOrderInput!) {
+      draftOrderCreate(input: $input) {
+        draftOrder {
+          id
+          status
+          email
+          createdAt
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    """
+    
+    variables = {"input": draft_order_input}
+    data = {"query": create_mutation, "variables": variables}
+    resp, _ = await self.client._requestAsync("POST", "/graphql.json", data=data)
+    
+    if "errors" in resp or resp.get("data", {}).get("draftOrderCreate", {}).get("userErrors"):
+        errors = resp.get("errors", [])
+        user_errors = resp.get("data", {}).get("draftOrderCreate", {}).get("userErrors", [])
+        error_messages = [e.get("message", str(e)) for e in errors + user_errors]
+        raise Exception(f"Failed to create duplicate order: {', '.join(error_messages)}")
+    
+    draft_order = resp.get("data", {}).get("draftOrderCreate", {}).get("draftOrder", {})
+    draft_order_id = draft_order.get("id", "").split("/")[-1] if draft_order.get("id") else None
+    
+    return {
+        "new_order_id": None,
+        "draft_order_id": draft_order_id,
+        "message": f"Order {order_id} duplicated successfully as draft order"
+    }
+
+
+async def cancel_order(
+    self,
+    order_id: int,
+    reason: Optional[str] = None,
+    restock: bool = True
+) -> Dict[str, Any]:
+    """
+    Cancels the specified order.
+    
+    Args:
+        order_id: The Shopify order ID to cancel
+        reason: Optional reason for cancellation
+        restock: Whether to restock the items
+        
+    Returns:
+        Dictionary containing cancelled_at and message
+    """
+    order_gid = f"gid://shopify/Order/{order_id}"
+    
+    mutation = """
+    mutation($orderId: ID!, $reason: OrderCancelReason!, $restock: Boolean!) {
+      orderCancel(orderId: $orderId, reason: $reason, restock: $restock) {
+        order {
+          id
+          cancelledAt
+          cancelReason
+          displayFulfillmentStatus
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    """
+    
+    # Map reason to OrderCancelReason enum
+    reason_map = {
+        "customer": "CUSTOMER_REQUEST",
+        "fraud": "FRAUD",
+        "inventory": "INVENTORY",
+        "declined": "DECLINED",
+        None: "OTHER"
+    }
+    
+    cancel_reason = reason_map.get(reason, "OTHER")
+    
+    variables = {
+        "orderId": order_gid,
+        "reason": cancel_reason,
+        "restock": restock
+    }
+    
+    data = {"query": mutation, "variables": variables}
+    resp, _ = await self.client._requestAsync("POST", "/graphql.json", data=data)
+    
+    if "errors" in resp or resp.get("data", {}).get("orderCancel", {}).get("userErrors"):
+        errors = resp.get("errors", [])
+        user_errors = resp.get("data", {}).get("orderCancel", {}).get("userErrors", [])
+        error_messages = [e.get("message", str(e)) for e in errors + user_errors]
+        raise Exception(f"Failed to cancel order: {', '.join(error_messages)}")
+    
+    order = resp.get("data", {}).get("orderCancel", {}).get("order", {})
+    cancelled_at = order.get("cancelledAt")
+    
+    return {
+        "cancelled_at": cancelled_at,
+        "message": f"Order {order_id} cancelled successfully"
+    }
+
+
+async def archive_order(
+    self,
+    order_id: int,
+    reason: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Archives the specified order.
+    
+    Args:
+        order_id: The Shopify order ID to archive
+        reason: Optional reason for archiving
+        
+    Returns:
+        Dictionary containing archived_at and message
+    """
+    order_gid = f"gid://shopify/Order/{order_id}"
+    
+    mutation = """
+    mutation($input: OrderUpdateInput!) {
+      orderUpdate(input: $input) {
+        order {
+          id
+          updatedAt
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    """
+    
+    variables = {
+        "input": {
+            "id": order_gid,
+            "metafields": [
+                {
+                    "namespace": "custom",
+                    "key": "archived",
+                    "value": "true",
+                    "type": "boolean"
+                },
+                {
+                    "namespace": "custom",
+                    "key": "archive_reason",
+                    "value": reason or "No reason provided",
+                    "type": "single_line_text"
+                },
+                {
+                    "namespace": "custom",
+                    "key": "archived_at",
+                    "value": str(__import__('datetime').datetime.utcnow().isoformat()),
+                    "type": "single_line_text"
+                }
+            ]
+        }
+    }
+    
+    data = {"query": mutation, "variables": variables}
+    resp, _ = await self.client._requestAsync("POST", "/graphql.json", data=data)
+    
+    if "errors" in resp or resp.get("data", {}).get("orderUpdate", {}).get("userErrors"):
+        errors = resp.get("errors", [])
+        user_errors = resp.get("data", {}).get("orderUpdate", {}).get("userErrors", [])
+        error_messages = [e.get("message", str(e)) for e in errors + user_errors]
+        raise Exception(f"Failed to archive order: {', '.join(error_messages)}")
+    
+    order = resp.get("data", {}).get("orderUpdate", {}).get("order", {})
+    updated_at = order.get("updatedAt")
+    
+    return {
+        "archived_at": updated_at,
+        "message": f"Order {order_id} archived successfully"
+    }
