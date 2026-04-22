@@ -1,0 +1,281 @@
+from schemas.pagination import PaginationInfo
+from enum import Enum
+from pydantic import BaseModel, Field
+from typing import Optional, List
+from utils.helpers import shopify_numeric_id
+
+
+class Order(BaseModel):
+    id: int
+    email: str
+    total_price: str
+    line_items: list
+
+
+class CustomerInfo(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+
+
+class OrderResponse(BaseModel):
+    # shopify_account_id: int
+    id: int
+    shopify_order_id: str
+    order_number: str
+    financial_status: Optional[str]
+    fulfillment_status: Optional[str]
+    currency: str
+    email: Optional[str]
+    created_at: str
+    subtotal_price: str
+    total_shipping_price: str
+    total_tax: str
+    total_price: str
+    customer: Optional[CustomerInfo] = None
+
+    sales_channel: Optional[str] = None
+    creation_channel: Optional[str] = None
+    source_number: Optional[str] = None
+
+    @classmethod
+    def from_shopify(cls, node: dict, shopify_account_id: int):
+        return cls(
+            # shopify_account_id=shopify_account_id,
+            shopify_order_id=node["id"].replace("gid://shopify/Order/", ""),
+            id=int(node["id"].replace("gid://shopify/Order/", "")),
+            order_number=node.get("name", ""),
+            financial_status=node.get("displayFinancialStatus"),
+            fulfillment_status=node.get("displayFulfillmentStatus"),
+            currency=node.get("currencyCode"),
+            email=(node.get("customer") or {}).get("email"),
+            created_at=node.get("createdAt"),
+            subtotal_price=(
+                node.get("subtotalPriceSet", {})
+                .get("shopMoney", {})
+                .get("amount", "0.00")
+            ),
+            total_shipping_price=(
+                node.get("currentShippingPriceSet", {})
+                .get("shopMoney", {})
+                .get("amount", "0.00")
+            ),
+            total_tax=(
+                node.get("currentTotalTaxSet", {})
+                .get("shopMoney", {})
+                .get("amount", "0.00")
+            ),
+            total_price=(
+                node.get("totalPriceSet", {})
+                .get("shopMoney", {})
+                .get("amount", "0.00")
+            ),
+            customer=CustomerInfo(
+                first_name=(node.get("customer") or {}).get("firstName"),
+                last_name=(node.get("customer") or {}).get("lastName"),
+            ) if node.get("customer") else None,
+
+            sales_channel=(node.get("salesChannel") or {}).get("value"),
+            creation_channel=(node.get("creationChannel") or {}).get("value"),
+            source_number=(node.get("orderNumber") or {}).get("value"),
+        )
+
+
+class OrderListResponse(BaseModel):
+    items: List[OrderResponse]
+    page_info: PaginationInfo
+
+
+def _money_str(d: dict | None, *path: str, default: str = "0.00") -> str:
+    cur = d or {}
+    for p in path:
+        cur = (cur or {}).get(p)
+        if cur is None:
+            return default
+    return str(cur)
+
+
+def _money_float(d: dict | None, *path: str) -> Optional[float]:
+    v = _money_str(d, *path, default=None)
+    try:
+        return float(v) if v is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+class Address(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    address1: Optional[str] = None
+    address2: Optional[str] = None
+    city: Optional[str] = None
+    province: Optional[str] = None
+    country: Optional[str] = None
+    zip: Optional[str] = None
+    company: Optional[str] = None
+    phone: Optional[str] = None
+
+
+class OrderDetailResponse(BaseModel):
+    id: str
+    order_number: str
+    email: Optional[str] = None
+    financial_status: Optional[str] = None
+    fulfillment_status: Optional[str] = None
+    total_price: str
+    subtotal_price: str
+    total_tax: str
+    total_shipping_price: str
+    currency: str
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+    customer: Optional[CustomerInfo] = None
+    shipping_address: Optional[Address] = None
+    billing_address: Optional[Address] = None
+
+    @classmethod
+    def from_shopify(cls, node: dict):
+        shipping_addr = node.get("shippingAddress")
+        billing_addr = node.get("billingAddress")
+        
+        return cls(
+            id=node["id"].replace("gid://shopify/Order/", ""),
+            order_number=node.get("name", ""),
+            email=(node.get("customer") or {}).get("email"),
+            financial_status=node.get("displayFinancialStatus"),
+            fulfillment_status=node.get("displayFulfillmentStatus"),
+            total_price=(
+                node.get("totalPriceSet", {})
+                .get("shopMoney", {})
+                .get("amount", "0.00")
+            ),
+            subtotal_price=(
+                node.get("subtotalPriceSet", {})
+                .get("shopMoney", {})
+                .get("amount", "0.00")
+            ),
+            total_tax=(
+                node.get("currentTotalTaxSet", {})
+                .get("shopMoney", {})
+                .get("amount", "0.00")
+            ),
+            total_shipping_price=(
+                node.get("currentShippingPriceSet", {})
+                .get("shopMoney", {})
+                .get("amount", "0.00")
+            ),
+            currency=node.get("currencyCode"),
+            created_at=node.get("createdAt"),
+            updated_at=node.get("updatedAt"),
+            customer=CustomerInfo(
+                first_name=(node.get("customer") or {}).get("firstName"),
+                last_name=(node.get("customer") or {}).get("lastName"),
+            ) if node.get("customer") else None,
+            shipping_address=Address(
+                first_name=shipping_addr.get("firstName"),
+                last_name=shipping_addr.get("lastName"),
+                address1=shipping_addr.get("address1"),
+                address2=shipping_addr.get("address2"),
+                city=shipping_addr.get("city"),
+                province=shipping_addr.get("provinceCode"),
+                country=shipping_addr.get("countryCode"),
+                zip=shipping_addr.get("zip"),
+                company=shipping_addr.get("company"),
+                phone=shipping_addr.get("phone"),
+            ) if shipping_addr else None,
+            billing_address=Address(
+                first_name=billing_addr.get("firstName"),
+                last_name=billing_addr.get("lastName"),
+                address1=billing_addr.get("address1"),
+                address2=billing_addr.get("address2"),
+                city=billing_addr.get("city"),
+                province=billing_addr.get("provinceCode"),
+                country=billing_addr.get("countryCode"),
+                zip=billing_addr.get("zip"),
+                company=billing_addr.get("company"),
+                phone=billing_addr.get("phone"),
+            ) if billing_addr else None,
+        )
+
+
+class OrderSortKey(str, Enum):
+    ID = "ID"
+    CREATED_AT = "CREATED_AT"
+    UPDATED_AT = "UPDATED_AT"
+    TOTAL_PRICE = "TOTAL_PRICE"
+
+
+class OrdersQueryParams(BaseModel):
+    query: Optional[str] = None
+    limit: int = 50
+    after: Optional[str] = None
+    before: Optional[str] = None
+    reverse: bool = True
+    sort_key: OrderSortKey = OrderSortKey.CREATED_AT
+
+
+async def parse_orders_query(
+    query: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=250),
+    after: Optional[str] = Query(None),
+    before: Optional[str] = Query(None),
+    reverse: bool = Query(True),
+    sort_key: OrderSortKey = Query(OrderSortKey.CREATED_AT),
+) -> OrdersQueryParams:
+    return OrdersQueryParams(
+        query=query,
+        limit=limit,
+        after=after,
+        before=before,
+        reverse=reverse,
+        sort_key=sort_key,
+    )
+
+
+# New Order Operation Schemas
+
+class RefundRequest(BaseModel):
+    reason: Optional[str] = Field(None, description="Reason for the refund")
+    note: Optional[str] = Field(None, description="Additional note for the refund")
+
+
+class RefundResponse(BaseModel):
+    order_id: int = Field(..., description="The order ID")
+    status: str = Field(..., description="Status of the refund operation")
+    refund_id: Optional[str] = Field(None, description="The refund ID from Shopify")
+    message: str = Field(..., description="Human-readable message about the operation")
+
+
+class DuplicateRequest(BaseModel):
+    include_line_items: bool = Field(True, description="Whether to include line items in the duplicate")
+    include_shipping: bool = Field(True, description="Whether to include shipping information")
+
+
+class DuplicateResponse(BaseModel):
+    original_order_id: int = Field(..., description="The original order ID")
+    new_order_id: Optional[str] = Field(None, description="The new order ID (if created as order)")
+    draft_order_id: Optional[str] = Field(None, description="The draft order ID (if created as draft)")
+    status: str = Field(..., description="Status of the duplication operation")
+    message: str = Field(..., description="Human-readable message about the operation")
+
+
+class CancelRequest(BaseModel):
+    reason: Optional[str] = Field(None, description="Reason for cancellation (customer, fraud, inventory, declined)")
+    restock: bool = Field(True, description="Whether to restock the items")
+
+
+class CancelResponse(BaseModel):
+    order_id: int = Field(..., description="The order ID")
+    status: str = Field(..., description="Status of the cancellation operation")
+    cancelled_at: Optional[str] = Field(None, description="Timestamp when the order was cancelled")
+    message: str = Field(..., description="Human-readable message about the operation")
+
+
+class ArchiveRequest(BaseModel):
+    reason: Optional[str] = Field(None, description="Reason for archiving the order")
+
+
+class ArchiveResponse(BaseModel):
+    order_id: int = Field(..., description="The order ID")
+    status: str = Field(..., description="Status of the archive operation")
+    archived_at: Optional[str] = Field(None, description="Timestamp when the order was archived")
+    message: str = Field(..., description="Human-readable message about the operation")
