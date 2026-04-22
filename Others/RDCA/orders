@@ -1,0 +1,214 @@
+from typing import Optional
+from fastapi import APIRouter, Query, Depends, HTTPException
+
+from depends_functions.get_shopify_account import get_shopify_GraphQl_client
+from schemas.orders import OrderListResponse, OrderResponse, OrderSortKey, OrderDetailResponse, parse_orders_query, \
+    OrdersQueryParams
+from schemas.pagination import PaginationInfo
+from security.helpers import authenticate_user
+from services.orders_service import OrderService
+from services.shopify.shopify_client_graph import ShopifyClientGraphQl
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/orders", tags=["orders"])
+
+
+# New Schema Models for Order Operations
+class RefundRequest(BaseModel):
+    reason: Optional[str] = None
+    note: Optional[str] = None
+
+
+class RefundResponse(BaseModel):
+    order_id: int
+    status: str
+    refund_id: Optional[str] = None
+    message: str
+
+
+class DuplicateRequest(BaseModel):
+    include_line_items: bool = True
+    include_shipping: bool = True
+
+
+class DuplicateResponse(BaseModel):
+    original_order_id: int
+    new_order_id: Optional[str] = None
+    draft_order_id: Optional[str] = None
+    status: str
+    message: str
+
+
+class CancelRequest(BaseModel):
+    reason: Optional[str] = None
+    restock: bool = True
+
+
+class CancelResponse(BaseModel):
+    order_id: int
+    status: str
+    cancelled_at: Optional[str] = None
+    message: str
+
+
+class ArchiveRequest(BaseModel):
+    reason: Optional[str] = None
+
+
+class ArchiveResponse(BaseModel):
+    order_id: int
+    status: str
+    archived_at: Optional[str] = None
+    message: str
+
+
+# Existing Endpoints
+@router.get(
+    "",
+    response_model=OrderListResponse,
+    dependencies=[Depends(authenticate_user)],
+    summary="Retrieve orders",
+    description="Fetches a list of Shopify orders with optional filtering, pagination and sorting.",
+)
+async def get_orders(
+        params: OrdersQueryParams = Depends(parse_orders_query),
+        shopify_client: ShopifyClientGraphQl = Depends(get_shopify_GraphQl_client),
+
+):
+    order_service = OrderService(shopify_client)
+    data = await order_service.fetch_orders(
+        query=params.query,
+        limit=params.limit,
+        after=params.after,
+        before=params.before,
+        reverse=params.reverse,
+        sort_key=params.sort_key,
+    )
+    items = [OrderResponse.from_shopify(node['node'], shopify_client.shopify_account_id).model_dump(by_alias=False) for
+             node in data["nodes"]]
+    page_info = PaginationInfo(
+        has_next_page=data["pageInfo"]["hasNextPage"],
+        has_previous_page=data["pageInfo"]["hasPreviousPage"],
+        start_cursor=data["pageInfo"].get("startCursor"),
+        end_cursor=data["pageInfo"].get("endCursor"),
+    )
+    return OrderListResponse(items=items, page_info=page_info)
+
+
+@router.get("/{order_id}", response_model=OrderDetailResponse,
+            dependencies=[Depends(authenticate_user)],
+            summary="Retrieve order details")
+async def get_order_detail(
+        order_id: int,
+        shopify_client: ShopifyClientGraphQl = Depends(get_shopify_GraphQl_client),
+):
+    service = OrderService(shopify_client)
+    node = await service.fetch_order_detail(order_id)
+    return OrderDetailResponse.from_shopify(node)
+
+
+# New Endpoints for Order Operations
+
+@router.post(
+    "/{order_id}/refund",
+    response_model=RefundResponse,
+    dependencies=[Depends(authenticate_user)],
+    summary="Refund an order",
+    description="Initiates a refund for the specified order."
+)
+async def refund_order(
+        order_id: int,
+        request: RefundRequest,
+        shopify_client: ShopifyClientGraphQl = Depends(get_shopify_GraphQl_client),
+):
+    service = OrderService(shopify_client)
+    try:
+        result = await service.refund_order(order_id, reason=request.reason, note=request.note)
+        return RefundResponse(
+            order_id=order_id,
+            status="success",
+            refund_id=result.get("refund_id"),
+            message=result.get("message", "Order refund initiated successfully")
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post(
+    "/{order_id}/duplicate",
+    response_model=DuplicateResponse,
+    dependencies=[Depends(authenticate_user)],
+    summary="Duplicate an order",
+    description="Creates a duplicate of the specified order as a draft order."
+)
+async def duplicate_order(
+        order_id: int,
+        request: DuplicateRequest,
+        shopify_client: ShopifyClientGraphQl = Depends(get_shopify_GraphQl_client),
+):
+    service = OrderService(shopify_client)
+    try:
+        result = await service.duplicate_order(
+            order_id,
+            include_line_items=request.include_line_items,
+            include_shipping=request.include_shipping
+        )
+        return DuplicateResponse(
+            original_order_id=order_id,
+            new_order_id=result.get("new_order_id"),
+            draft_order_id=result.get("draft_order_id"),
+            status="success",
+            message=result.get("message", "Order duplicated successfully")
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post(
+    "/{order_id}/cancel",
+    response_model=CancelResponse,
+    dependencies=[Depends(authenticate_user)],
+    summary="Cancel an order",
+    description="Cancels the specified order."
+)
+async def cancel_order(
+        order_id: int,
+        request: CancelRequest,
+        shopify_client: ShopifyClientGraphQl = Depends(get_shopify_GraphQl_client),
+):
+    service = OrderService(shopify_client)
+    try:
+        result = await service.cancel_order(order_id, reason=request.reason, restock=request.restock)
+        return CancelResponse(
+            order_id=order_id,
+            status="success",
+            cancelled_at=result.get("cancelled_at"),
+            message=result.get("message", "Order cancelled successfully")
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post(
+    "/{order_id}/archive",
+    response_model=ArchiveResponse,
+    dependencies=[Depends(authenticate_user)],
+    summary="Archive an order",
+    description="Archives the specified order."
+)
+async def archive_order(
+        order_id: int,
+        request: ArchiveRequest,
+        shopify_client: ShopifyClientGraphQl = Depends(get_shopify_GraphQl_client),
+):
+    service = OrderService(shopify_client)
+    try:
+        result = await service.archive_order(order_id, reason=request.reason)
+        return ArchiveResponse(
+            order_id=order_id,
+            status="success",
+            archived_at=result.get("archived_at"),
+            message=result.get("message", "Order archived successfully")
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
