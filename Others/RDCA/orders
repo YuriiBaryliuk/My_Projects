@@ -1,19 +1,9 @@
-from typing import Optional
-from fastapi import APIRouter, Query, Depends, HTTPException
-
-from depends_functions.get_shopify_account import get_shopify_GraphQl_client
-from schemas.orders import OrderListResponse, OrderResponse, OrderSortKey, OrderDetailResponse, parse_orders_query, \
-    OrdersQueryParams
-from schemas.pagination import PaginationInfo
-from security.helpers import authenticate_user
-from services.orders_service import OrderService
-from services.shopify.shopify_client_graph import ShopifyClientGraphQl
+from fastapi import HTTPException
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
 
-# New Schema Models for Order Operations
 class RefundRequest(BaseModel):
     reason: Optional[str] = None
     note: Optional[str] = None
@@ -61,53 +51,6 @@ class ArchiveResponse(BaseModel):
     archived_at: Optional[str] = None
     message: str
 
-
-# Existing Endpoints
-@router.get(
-    "",
-    response_model=OrderListResponse,
-    dependencies=[Depends(authenticate_user)],
-    summary="Retrieve orders",
-    description="Fetches a list of Shopify orders with optional filtering, pagination and sorting.",
-)
-async def get_orders(
-        params: OrdersQueryParams = Depends(parse_orders_query),
-        shopify_client: ShopifyClientGraphQl = Depends(get_shopify_GraphQl_client),
-
-):
-    order_service = OrderService(shopify_client)
-    data = await order_service.fetch_orders(
-        query=params.query,
-        limit=params.limit,
-        after=params.after,
-        before=params.before,
-        reverse=params.reverse,
-        sort_key=params.sort_key,
-    )
-    items = [OrderResponse.from_shopify(node['node'], shopify_client.shopify_account_id).model_dump(by_alias=False) for
-             node in data["nodes"]]
-    page_info = PaginationInfo(
-        has_next_page=data["pageInfo"]["hasNextPage"],
-        has_previous_page=data["pageInfo"]["hasPreviousPage"],
-        start_cursor=data["pageInfo"].get("startCursor"),
-        end_cursor=data["pageInfo"].get("endCursor"),
-    )
-    return OrderListResponse(items=items, page_info=page_info)
-
-
-@router.get("/{order_id}", response_model=OrderDetailResponse,
-            dependencies=[Depends(authenticate_user)],
-            summary="Retrieve order details")
-async def get_order_detail(
-        order_id: int,
-        shopify_client: ShopifyClientGraphQl = Depends(get_shopify_GraphQl_client),
-):
-    service = OrderService(shopify_client)
-    node = await service.fetch_order_detail(order_id)
-    return OrderDetailResponse.from_shopify(node)
-
-
-# New Endpoints for Order Operations
 
 @router.post(
     "/{order_id}/refund",
