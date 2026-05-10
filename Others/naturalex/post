@@ -1,0 +1,148 @@
+import asyncio
+import json
+import os
+
+import httpx
+
+# --- Configuration ---
+SHOP = ".myshopify.com"
+API_VERSION = "2024-04"
+ACCESS_TOKEN = ""
+
+SHOPIFY_GRAPHQL_ENDPOINT = f"https://{SHOP}/admin/api/{API_VERSION}/graphql.json"
+
+HEADERS = {
+    "Content-Type": "application/json",
+    "X-Shopify-Access-Token": ACCESS_TOKEN,
+}
+
+# --- GraphQL mutation: create a product with media and metafields ---
+CREATE_PRODUCT_MUTATION = """
+mutation productCreate($input: ProductInput!, $media: [CreateMediaInput!]) {
+  productCreate(input: $input, media: $media) {
+    product {
+      id
+      title
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+"""
+
+
+async def graphql(client: httpx.AsyncClient, query: str, variables: dict) -> dict:
+    response = await client.post(
+        SHOPIFY_GRAPHQL_ENDPOINT,
+        headers=HEADERS,
+        json={"query": query, "variables": variables},
+        timeout=60.0,
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def has_user_errors(result: dict, root_field: str) -> bool:
+    data = result.get("data", {}).get(root_field, {})
+    errors = data.get("userErrors", []) or []
+    if errors:
+        for err in errors:
+            field = ".".join(err.get("field", [])) if isinstance(err.get("field"), list) else err.get("field")
+            print(f"{root_field} error [{field}]: {err.get('message')}")
+        return True
+    return False
+
+
+async def load_products_from_file(file_path: str) -> None:
+    if not os.path.exists(file_path):
+        print(f"Error: File '{file_path}' not found.")
+        return
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    products = data.get("products", [])
+
+    async with httpx.AsyncClient() as client:
+        for item in products:
+            title = item.get("title", "")
+
+            # Build tags array from comma-separated string
+            raw_tags = item.get("tags", "")
+            tags = [t.strip() for t in raw_tags.split(",") if t.strip()] if raw_tags else []
+
+            # Build media array from semicolon-separated image URLs
+            raw_images = item.get("images", "") or ""
+            image_urls = [u.strip() for u in raw_images.split(";") if u.strip()]
+            media = [
+                {
+                    "originalSource": url,
+                    "alt": title,
+                    "mediaContentType": "IMAGE",
+                }
+                for url in image_urls
+            ]
+
+            # Build metafields input (if any)
+            raw_metafields = item.get("metafields", []) or []
+            metafields_input = [
+                {
+                    "namespace": mf["namespace"],
+                    "key": mf["key"],
+                    "type": mf["type"],
+                    "value": str(mf["value"]),
+                }
+                for mf in raw_metafields
+                if mf.get("namespace") and mf.get("key") and mf.get("type") is not None
+            ]
+
+            # Optional SEO description: take metafield with key "meta_description" if present
+            seo_description = next(
+                (
+                    str(mf["value"])
+                    for mf in raw_metafields
+                    if mf.get("key") == "meta_description"
+                ),
+                None,
+            )
+
+            variables = {
+                "input": {
+                    "title": title,
+                    "descriptionHtml": item.get("descriptionHtml") or "",
+                    "vendor": item.get("vendor") or "",
+                    "productType": item.get("productType") or "",
+                    "tags": tags,
+                    "status": "ACTIVE",
+                    "seo": {
+                        "title": item.get("seo_title") or title,
+                        "description": seo_description,
+                    },
+                    "metafields": metafields_input,
+                },
+                "media": media,
+            }
+
+            try:
+                result = await graphql(client, CREATE_PRODUCT_MUTATION, variables)
+            except httpx.HTTPError as e:
+                print(f"HTTP error while creating product: {e}")
+                continue
+
+            if "errors" in result:
+                # Top-level GraphQL errors (e.g., syntax, auth)
+                print(f"GraphQL error: {result['errors']}")
+                continue
+
+            if has_user_errors(result, "productCreate"):
+                # userErrors from the productCreate mutation
+                continue
+
+            product = result["data"]["productCreate"]["product"]
+            print(f"Created product {product['id']} ({product['title']})")
+
+
+if __name__ == "__main__":
+    asyncio.run(load_products_from_file("data.json"))
