@@ -71,6 +71,17 @@ def extract_sku(html):
     match = re.search(r'(?:\(Code:|\bCode:)\s*([A-Z0-9-]+)', html, re.I)
     return match.group(1).strip() if match else None
 
+def extract_gtin13(soup):
+    for script in soup.find_all("script", type="application/ld+json"):
+        try:
+            data = json.loads(script.string)
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if isinstance(data, dict) and data.get("@type") == "Product":
+            gtin = data.get("gtin13")
+            if gtin:
+                return gtin
+    return ""
 
 def extract_product_data(html: str, url: str):
     soup = BeautifulSoup(html, 'html.parser')
@@ -88,6 +99,7 @@ def extract_product_data(html: str, url: str):
         return None, None
 
     sku = extract_sku(html)
+    gtin13 = extract_gtin13(soup)
 
     # Vendor
     vendor = None
@@ -146,7 +158,7 @@ def extract_product_data(html: str, url: str):
     variant = {
         "article_id": article_id,
         "SKU": sku,
-        "barcode": "",
+        "barcode": gtin13,
         "title": "Default Title",
         "cost": 0.0,
         "compareAtPrice": 0.0,
