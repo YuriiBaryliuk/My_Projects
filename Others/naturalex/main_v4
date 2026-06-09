@@ -138,7 +138,11 @@ def extract_product_data(html: str, url: str):
             compare_price = 0.0
 
     # Apply logic
-    if compare_price > 0:
+    if meta_price == 0.0:
+        # Zero price — both null
+        final_cost = None
+        final_compare = None
+    elif compare_price > 0:
         # Has discount: cost=original, compareAtPrice=discounted
         final_cost = compare_price
         final_compare = meta_price
