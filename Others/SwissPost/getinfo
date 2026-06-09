@@ -1,0 +1,310 @@
+import argparse
+import json
+import re
+import time
+
+import requests
+from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
+
+BASE_API = "https://service.post.ch/ekp-web/api"
+
+
+# ── Browser ───────────────────────────────────────────────────────────────────
+
+def wait_for_consignment(page, timeout: int = 20_000) -> bool:
+    """Wait for the SPA to render shipment content."""
+    try:
+        page.wait_for_selector(
+            "ekp-event-item, ekp-shipment-detail, main, [class*='detail']",
+            timeout=timeout,
+        )
+        page.wait_for_timeout(3_000)  # let JS settle
+        return True
+    except PlaywrightTimeout:
+        return False
+
+
+def expand_all_events(page) -> None:
+    """Click 'show more' repeatedly until no more buttons exist."""
+    clicks = 0
+    while True:
+        try:
+            # Same CSS target as before — the pi-2040 icon inside an <a>
+            btn = page.query_selector("a .pi-2040")
+            if btn is None:
+                break
+            btn.evaluate("el => el.closest('a').click()")
+            clicks += 1
+            page.wait_for_timeout(1_500)
+        except Exception:
+            break
+
+    if clicks:
+        print(f"    -> Clicked 'show more' {clicks}x")
+    else:
+        print("    -> All events already visible")
+
+
+# ── Page field scraping ───────────────────────────────────────────────────────
+
+def scrape_page_fields(page_text: str) -> dict:
+    fields = {
+        "consignment_number": None,
+        "service_type":       None,
+        "sender_type":        None,
+        "expected_delivery":  None,
+        "delivery_address":   None,
+        "mailed_from":        None,
+    }
+
+    m = re.search(r"\b(\d{2}\.\d{2}\.\d{6}\.\d{8})\b", page_text)
+    if m:
+        fields["consignment_number"] = m.group(1)
+
+    m = re.search(r"\b(PostPac(?:\s+\w+)?)\b", page_text)
+    if m:
+        fields["service_type"] = m.group(1).strip()
+
+    m = re.search(r"(Domestic|International)\s+sender", page_text, re.IGNORECASE)
+    if m:
+        fields["sender_type"] = m.group(0).strip()
+
+    m = re.search(r"Expected delivery\s*\n(.+)", page_text)
+    if m:
+        fields["expected_delivery"] = m.group(1).strip()
+
+    m = re.search(r"Delivery address\s*\n(\d{4}\s+[^\n]+)", page_text)
+    if m:
+        fields["delivery_address"] = m.group(1).strip()
+
+    m = re.search(r"(\d{4}\s+\w[\w\s-]+)\s*(?:show more|$)", page_text)
+    if m:
+        fields["mailed_from"] = m.group(1).strip()
+
+    return fields
+
+
+# ── Event description scraping ────────────────────────────────────────────────
+
+_MONTH_MAP = {
+    "january": "01", "february": "02", "march": "03",    "april": "04",
+    "may": "05",      "june": "06",     "july": "07",     "august": "08",
+    "september": "09","october": "10",  "november": "11", "december": "12",
+}
+
+
+def _day_label_to_date(label: str) -> str | None:
+    m = re.search(r"(\d{1,2})\s+(\w+)\s+(\d{4})", label or "")
+    if not m:
+        return None
+    day, month_word, year = m.group(1), m.group(2).lower(), m.group(3)
+    month = _MONTH_MAP.get(month_word)
+    if not month:
+        return None
+    return f"{year}-{month}-{int(day):02d}"
+
+
+def scrape_page_events(soup: BeautifulSoup) -> list:
+    results = []
+
+    for day_block in soup.select("ekp-event-day"):
+        day_el    = day_block.select_one(".sub-menu-item span")
+        day_label = day_el.get_text(strip=True) if day_el else None
+
+        for item in day_block.select("ekp-event-item"):
+            time_el  = item.select_one(".time")
+            time_str = time_el.get_text(strip=True) if time_el else None
+
+            description = None
+            location    = None
+
+            col8 = item.select_one(".col-8")
+            if col8:
+                inner = col8.find("div")
+                if inner:
+                    divs  = inner.find_all("div", recursive=False)
+                    texts = [d.get_text(strip=True) for d in divs]
+                    description = texts[0] if len(texts) > 0 else None
+                    loc_raw     = texts[1] if len(texts) > 1 else None
+                    location    = loc_raw if loc_raw else None
+
+            results.append({
+                "day":         day_label,
+                "time":        time_str,
+                "description": description,
+                "location":    location,
+            })
+
+    return results
+
+
+def merge_events(api_events: list, page_events: list) -> list:
+    page_by_datetime: dict = {}
+    page_by_time: dict     = {}
+
+    for pe in page_events:
+        t = pe.get("time")
+        if not t:
+            continue
+        page_by_time[t] = pe
+        date_str = _day_label_to_date(pe.get("day", ""))
+        if date_str:
+            page_by_datetime[f"{date_str} {t}"] = pe
+
+    merged = []
+    for event in api_events:
+        ts       = event.get("timestamp", "")
+        dt_match = re.search(r"(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})", ts)
+        date_str = dt_match.group(1) if dt_match else None
+        time_str = dt_match.group(2) if dt_match else None
+
+        key  = f"{date_str} {time_str}" if date_str and time_str else None
+        page = page_by_datetime.get(key) or page_by_time.get(time_str) or {}
+
+        merged.append({
+            "day":           page.get("day"),
+            "time":          time_str,
+            "description":   page.get("description"),
+            "location":      page.get("location"),
+            "timestamp":     ts,
+            "eventCode":     event.get("eventCode"),
+            "eventCodeType": event.get("eventCodeType"),
+            "zip":           event.get("zip"),
+            "city":          event.get("city"),
+            "country":       event.get("country"),
+            "shipmentNumber":event.get("shipmentNumber"),
+            "subEventId":    event.get("subEventId"),
+            "remarks":       event.get("remarks"),
+            "flags":         event.get("flags", []),
+        })
+
+    merged.sort(key=lambda x: x["timestamp"] or "")
+    return merged
+
+
+# ── API calls ─────────────────────────────────────────────────────────────────
+
+def call_shipment_api(tracking_id: str, cookies: dict) -> dict:
+    headers = {
+        "Accept":           "application/json",
+        "Referer":          f"https://service.post.ch/ekp-web/ui/list/detail/{tracking_id}?lang=en",
+        "User-Agent":       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "X-Requested-With": "XMLHttpRequest",
+    }
+
+    try:
+        print("[*] Fetching shipment details...")
+        r = requests.get(
+            f"{BASE_API}/shipment/id/{tracking_id}",
+            headers=headers,
+            cookies=cookies,
+            timeout=15,
+        )
+        print(f"    → Status: {r.status_code}")
+        if r.status_code == 200:
+            return {"shipment": r.json()}
+        return {"shipment": {"status_code": r.status_code, "body": r.text[:500]}}
+    except Exception as e:
+        return {"shipment": {"error": str(e)}}
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+def run(url: str, headless: bool = True) -> dict:
+    m = re.search(r"/detail/([^?]+)", url)
+    if not m:
+        raise ValueError("Could not extract tracking ID from URL.")
+    tracking_id = m.group(1)
+
+    print(f"[*] Tracking ID: {tracking_id}")
+    print(f"[*] Launching Playwright (headless={headless})...")
+
+    page_fields: dict = {}
+    page_events: list = []
+    cookies:     dict = {}
+
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(
+            headless=headless,
+            args=["--no-sandbox", "--disable-dev-shm-usage"],
+        )
+        context = browser.new_context(
+            viewport={"width": 1920, "height": 1080},
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/124.0.0.0 Safari/537.36"
+            ),
+        )
+        page = context.new_page()
+
+        try:
+            page.goto(url, wait_until="domcontentloaded")
+
+            if not wait_for_consignment(page):
+                print("[!] Page slow to load — continuing anyway.")
+
+            print("[*] Expanding all events...")
+            expand_all_events(page)
+
+            page_text = page.inner_text("body")
+            soup      = BeautifulSoup(page.content(), "html.parser")
+
+            print("[*] Extracting page fields...")
+            page_fields = scrape_page_fields(page_text)
+
+            print("[*] Scraping event descriptions from page HTML...")
+            page_events = scrape_page_events(soup)
+            print(f"    → Found {len(page_events)} event(s) on page")
+
+            print("[*] Collecting browser cookies...")
+            # Playwright returns a list of dicts; convert to name→value
+            cookies = {c["name"]: c["value"] for c in context.cookies()}
+
+        except Exception as e:
+            print(f"[!] Browser error: {e}")
+        finally:
+            browser.close()
+            print("[*] Browser closed.")
+
+    print("[*] Calling shipment API...")
+    api_result = call_shipment_api(tracking_id, cookies)
+    shipment   = api_result.get("shipment", {})
+    api_events = shipment.pop("events", []) if isinstance(shipment, dict) else []
+
+    merged = merge_events(api_events, page_events)
+    if isinstance(shipment, dict):
+        shipment["events"] = merged
+
+    return {
+        "source_url":  url,
+        "tracking_id": tracking_id,
+        "page_fields": page_fields,
+        "api": {"shipment": shipment},
+        "error": None,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Swiss Post scraper (Playwright).")
+    parser.add_argument(
+        "--url",
+        default=(
+            "https://service.post.ch/ekp-web/ui/list/detail/"
+            "pVSH-9larLifKKRoZYdSrmF4-abtfNRcN0GbyPbiiAc5eZaSbBpWLA?lang=en"
+        ),
+    )
+    parser.add_argument("--output", default="swiss_post_order.json")
+    parser.add_argument("--no-headless", action="store_true")
+    args = parser.parse_args()
+
+    data = run(args.url, headless=not args.no_headless)
+
+    with open(args.output, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    print(f"\n[✓] Saved to: {args.output}")
+
+
+if __name__ == "__main__":
+    main()
