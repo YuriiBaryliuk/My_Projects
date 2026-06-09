@@ -122,29 +122,30 @@ def extract_product_data(html: str, url: str):
             soup.find('td', colspan=True))
     description_html = str(desc) if desc else None
 
-#------------------------------------------
-
-    # Price — meta tag always holds the DISCOUNTED (final) price
+    # Price from meta tag (always the final/discounted price)
     price_tag = soup.find('meta', itemprop='price')
     meta_price = float(price_tag['content']) if price_tag and price_tag.get('content') else 0.0
 
-    # Look for the "9,23 CHF(-30,01%) 6,46 CHF" pattern in page text
-    discount_pattern = re.search(
-        r'(\d+[,\.]\d+)\s*CHF\s*\(-[\d,\.]+%\)\s*(\d+[,\.]\d+)\s*CHF',
-        html  # pass raw html string, not soup
-    )
+    # Original (crossed-out) price from PBStrike div
+    strike_tag = soup.find('div', class_='PBStrike')
+    compare_price = 0.0
+    if strike_tag:
+        raw = re.sub(r'[^\d,.]', '', strike_tag.get_text())
+        raw = raw.replace(',', '.')
+        try:
+            compare_price = float(raw)
+        except ValueError:
+            compare_price = 0.0
 
-    if discount_pattern:
-        original_price = float(discount_pattern.group(1).replace(',', '.'))
-        discounted_price = float(discount_pattern.group(2).replace(',', '.'))
-        final_cost = original_price
-        final_compare = discounted_price
+    # Apply logic
+    if compare_price > 0:
+        # Has discount: cost=original, compareAtPrice=discounted
+        final_cost = compare_price
+        final_compare = meta_price
     else:
-        # No discount — meta price is the real price
+        # No discount: cost=null, compareAtPrice=actual price
         final_cost = None
         final_compare = meta_price
-
-#------------------------------------
 
     # Images
     images = []
