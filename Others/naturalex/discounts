@@ -1,0 +1,150 @@
+import httpx
+import re
+import json
+import logging
+from datetime import datetime
+from bs4 import BeautifulSoup
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+BASE_URL = "https://www.naturalex.shop"
+PROMO_URL = f"{BASE_URL}/promo-c102x4398737"
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+}
+
+
+def fetch_page(url: str) -> str | None:
+    try:
+        r = httpx.get(url, headers=HEADERS, timeout=20.0)
+        r.raise_for_status()
+        try:
+            return r.content.decode('utf-8')
+        except UnicodeDecodeError:
+            return r.content.decode('windows-1250', errors='replace')
+    except Exception as e:
+        logger.error(f"Failed to fetch {url}: {e}")
+        return None
+
+
+def get_total_pages(html: str) -> int:
+    """Detect the last page number from pagination."""
+    soup = BeautifulSoup(html, 'html.parser')
+    page_links = soup.find_all('a', href=re.compile(r'\?page=\d+'))
+    pages = [int(re.search(r'\?page=(\d+)', a['href']).group(1)) for a in page_links]
+    return max(pages) if pages else 1
+
+
+def parse_discounted_products(html: str) -> list[dict]:
+    """
+    Extract products that have a discount (compareAtPrice) from a promo listing page.
+    Discount indicator: price text contains a percentage like (-30,01%)
+    """
+    soup = BeautifulSoup(html, 'html.parser')
+    results = []
+
+    for a in soup.find_all('a', href=re.compile(r'-c2x\d+')):
+        href = a.get('href', '')
+        article_match = re.search(r'-c2x(\d+)', href)
+        if not article_match:
+            continue
+
+        article_id = article_match.group(1)
+        title = a.get_text(strip=True)
+
+        # The discount info sits in the parent container — walk up to find it
+        container = a.parent
+        for _ in range(5):  # walk up max 5 levels
+            if container is None:
+                break
+            text = container.get_text(' ', strip=True)
+            discount_match = re.search(r'(-\d+[,\.]\d+%)', text)
+            if discount_match:
+                break
+            container = container.parent
+
+        if not discount_match:
+            continue  # no discount on this product
+
+        # Extract original and discounted prices from container text
+        # Pattern: "13,73 CHF(-30,01%) 9,61 CHF"
+        price_match = re.search(
+            r'(\d+[,\.]\d+)\s*CHF\s*\(-[\d,\.]+%\)\s*(\d+[,\.]\d+)\s*CHF',
+            text
+        )
+
+        original_price = float(price_match.group(1).replace(',', '.')) if price_match else None
+        discounted_price = float(price_match.group(2).replace(',', '.')) if price_match else None
+
+        results.append({
+            "article_id": article_id,
+            "title": title,
+            "url": href if href.startswith('http') else BASE_URL + href,
+            "original_price": original_price,
+            "discounted_price": discounted_price,
+            "discount_pct": discount_match.group(1) if discount_match else None,
+        })
+
+    # Deduplicate by article_id (each product appears twice in the HTML)
+    seen = set()
+    unique = []
+    for p in results:
+        if p["article_id"] not in seen:
+            seen.add(p["article_id"])
+            unique.append(p)
+
+    return unique
+
+
+def main():
+    logger.info("Fetching first promo page...")
+    first_page_html = fetch_page(PROMO_URL)
+    if not first_page_html:
+        logger.error("Could not fetch promo page. Exiting.")
+        return
+
+    total_pages = get_total_pages(first_page_html)
+    logger.info(f"Found {total_pages} pages of promo products.")
+
+    all_products = []
+    seen_ids = set()
+
+    for page_num in range(1, total_pages + 1):
+        url = PROMO_URL if page_num == 1 else f"{PROMO_URL}?page={page_num}"
+        logger.info(f"Scraping page {page_num}/{total_pages} → {url}")
+
+        html = fetch_page(url)
+        if not html:
+            logger.warning(f"Skipping page {page_num} — fetch failed.")
+            continue
+
+        products = parse_discounted_products(html)
+        new = [p for p in products if p["article_id"] not in seen_ids]
+        for p in new:
+            seen_ids.add(p["article_id"])
+        all_products.extend(new)
+        logger.info(f"  → {len(new)} discounted products found on this page (total: {len(all_products)})")
+
+    # Save full data as JSON
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    json_file = f"discount_products_{timestamp}.json"
+    with open(json_file, 'w', encoding='utf-8') as f:
+        json.dump(all_products, f, ensure_ascii=False, indent=2)
+
+    # Save just the IDs as a plain text file
+    ids_file = f"discount_ids_{timestamp}.txt"
+    with open(ids_file, 'w', encoding='utf-8') as f:
+        for p in all_products:
+            f.write(p["article_id"] + "\n")
+
+    logger.info(f"Done! {len(all_products)} discounted products saved.")
+    logger.info(f"  Full data → {json_file}")
+    logger.info(f"  IDs only  → {ids_file}")
+
+
+if __name__ == "__main__":
+    main()
