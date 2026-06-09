@@ -1,0 +1,15 @@
+import json
+
+# Load your JSON data from a file
+with open('products.json', 'r', encoding='utf-8') as f:
+    data = json.load(f)
+
+# Find variants with a cost of 0.0 and collect their article_id
+zero_cost_ids = [
+    variant.get('article_id')
+    for variant in data.get('variants', [])
+    if variant.get('cost') == 0.0
+]
+
+print(f"Number of products with 0.0 cost: {len(zero_cost_ids)}")
+print(f"Product IDs: {zero_cost_ids}")
