@@ -1,0 +1,113 @@
+"""
+Example:
+    python main.py url product.json
+"""
+
+import sys
+import json
+import html
+import re
+import requests
+from bs4 import BeautifulSoup
+
+
+def fetch_html(url: str) -> str:
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124.0 Safari/537.36"
+        )
+    }
+    resp = requests.get(url, headers=headers, timeout=30)
+    resp.raise_for_status()
+    return resp.text
+
+
+def extract_product_json(page_html: str) -> dict:
+    soup = BeautifulSoup(page_html, "html.parser")
+
+    container = soup.find(id="product-details")
+
+    if container is None or not container.has_attr("data-product"):
+        match = re.search(r'data-product="({.*?})"\s', page_html, re.DOTALL)
+        if not match:
+            raise ValueError("Could not find data-product JSON on the page.")
+        raw = match.group(1)
+    else:
+        raw = container["data-product"]
+
+    decoded = html.unescape(raw)
+    return json.loads(decoded)
+
+
+def extract_brand(page_html: str):
+    """Extract item_brand from the GTM dataLayer ecommerce JSON block."""
+    match = re.search(r'cdcDatalayer\s*=\s*({.*?});', page_html, re.DOTALL)
+    if not match:
+        return None
+    try:
+        data = json.loads(match.group(1))
+        items = data.get("ecommerce", {}).get("items", [])
+        if items:
+            return items[0].get("item_brand")
+    except json.JSONDecodeError:
+        return None
+    return None
+
+
+def build_output(product: dict, brand) -> dict:
+    return {
+        "id_product": product.get("id_product"),
+        "sku": product.get("reference"),
+        "title": product.get("meta_title"),
+        "description": product.get("description"),
+        "meta_description": product.get("meta_description"),
+        "brand": brand,
+        "price_amount": product.get("price_amount"),
+        "price_tax_exc": product.get("price_tax_exc"),
+        "price_without_reduction": product.get("price_without_reduction"),
+        "currency": "CHF",
+        "rate_tax_percent": product.get("rate"),
+        "has_discount": product.get("has_discount"),
+        "reduction": product.get("reduction"),
+        "specific_prices": product.get("specific_prices"),
+        "quantity": product.get("quantity"),
+        "quantity_all_versions": product.get("quantity_all_versions"),
+        "out_of_stock": product.get("out_of_stock"),
+        "low_stock_threshold": product.get("low_stock_threshold"),
+        "availability": product.get("availability"),
+        "category_name": product.get("category_name"),
+        "id_category_default": product.get("id_category_default"),
+        "url": product.get("link"),
+        "images": [
+            img.get("large", {}).get("url") or img.get("medium", {}).get("url")
+            for img in product.get("images", [])
+        ],
+        "date_add": product.get("date_add"),
+        "date_upd": product.get("date_upd"),
+    }
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python scrape_kanela.py <product_url> [output.json]")
+        sys.exit(1)
+
+    url = sys.argv[1]
+    output_path = sys.argv[2] if len(sys.argv) > 2 else "product.json"
+
+    page_html = fetch_html(url)
+    product = extract_product_json(page_html)
+    brand = extract_brand(page_html)
+    result = build_output(product, brand)
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+
+    print(f"Saved product data to {output_path}")
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()
