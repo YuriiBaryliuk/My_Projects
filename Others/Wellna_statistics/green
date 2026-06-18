@@ -1,0 +1,332 @@
+"""
+green_shop_scraper.py
+---------------------
+Scrapes product information from green-shop.ch product pages
+and saves the result as a JSON file.
+
+Usage:
+    python green_shop_scraper.py <product_url> [--output <file.json>]
+
+Example:
+    python green_shop_scraper.py \
+        https://www.green-shop.ch/products/creme-de-jour-a-la-melisse-bio-30ml-dr-hauschka
+
+Dependencies:
+    pip install requests beautifulsoup4
+"""
+
+import argparse
+import json
+import re
+import sys
+from datetime import datetime
+from pathlib import Path
+
+import requests
+from bs4 import BeautifulSoup
+
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept-Language": "fr-CH,fr;q=0.9,en;q=0.8",
+}
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def fetch_page(url: str) -> BeautifulSoup:
+    response = requests.get(url, headers=HEADERS, timeout=15)
+    response.raise_for_status()
+    return BeautifulSoup(response.text, "html.parser")
+
+
+def text(element) -> str | None:
+    """Return stripped text from a BS4 element, or None."""
+    return element.get_text(strip=True) if element else None
+
+
+def get_meta(soup: BeautifulSoup, name: str) -> str | None:
+    """Extract <meta name=...> or <meta property=...> content."""
+    tag = soup.find("meta", attrs={"name": name}) or \
+          soup.find("meta", attrs={"property": name})
+    return tag["content"].strip() if tag and tag.get("content") else None
+
+
+# ---------------------------------------------------------------------------
+# Shopify JSON endpoint (most reliable source of structured data)
+# ---------------------------------------------------------------------------
+
+def fetch_shopify_json(url: str) -> dict:
+    """
+    Shopify exposes a machine-readable JSON endpoint at <product-url>.json
+    This is the most reliable source for price, variants, images, etc.
+    """
+    json_url = url.rstrip("/") + ".json"
+    try:
+        resp = requests.get(json_url, headers=HEADERS, timeout=15)
+        resp.raise_for_status()
+        return resp.json().get("product", {})
+    except Exception:
+        return {}
+
+
+# ---------------------------------------------------------------------------
+# HTML parsing fallbacks
+# ---------------------------------------------------------------------------
+
+def parse_basic_info(soup: BeautifulSoup, shopify: dict) -> dict:
+    title = (
+        shopify.get("title")
+        or text(soup.find("h1"))
+        or get_meta(soup, "og:title")
+    )
+
+    brand = (
+        shopify.get("vendor")
+        or text(soup.find("a", class_=re.compile(r"vendor|brand", re.I)))
+    )
+
+    sku = shopify.get("variants", [{}])[0].get("sku") if shopify.get("variants") else None
+    if not sku:
+        sku_tag = soup.find(string=re.compile(r"SKU\s*:", re.I))
+        if sku_tag:
+            sku = sku_tag.find_next(string=True).strip() if sku_tag.find_next() else None
+
+    description = (
+        shopify.get("body_html")
+        or get_meta(soup, "description")
+        or get_meta(soup, "og:description")
+    )
+    # Strip HTML tags from description
+    if description:
+        description = BeautifulSoup(description, "html.parser").get_text(separator=" ", strip=True)
+
+    return {
+        "title": title,
+        "brand": brand,
+        "sku": sku,
+        "description": description,
+    }
+
+
+def parse_price(soup: BeautifulSoup, shopify: dict) -> dict:
+    price_info: dict = {}
+
+    if shopify.get("variants"):
+        variant = shopify["variants"][0]
+        price_info["price"] = float(variant.get("price", 0))
+        compare_at = variant.get("compare_at_price")
+        if compare_at:
+            price_info["compare_at_price"] = float(compare_at)
+        price_info["currency"] = "CHF"
+    else:
+        amount = get_meta(soup, "product:price:amount")
+        currency = get_meta(soup, "product:price:currency")
+        if amount:
+            price_info["price"] = float(amount)
+        if currency:
+            price_info["currency"] = currency
+
+    return price_info
+
+
+def parse_availability(soup: BeautifulSoup, shopify: dict) -> str:
+    if shopify.get("variants"):
+        available = any(v.get("available") for v in shopify["variants"])
+        return "in_stock" if available else "out_of_stock"
+
+    avail_meta = get_meta(soup, "product:availability")
+    if avail_meta:
+        return avail_meta.replace(" ", "_").lower()
+
+    in_stock_indicator = soup.find(string=re.compile(r"en rupture|out of stock", re.I))
+    return "out_of_stock" if in_stock_indicator else "unknown"
+
+
+def parse_images(soup: BeautifulSoup, shopify: dict) -> list[str]:
+    if shopify.get("images"):
+        return [img["src"] for img in shopify["images"]]
+
+    images = []
+    for tag in soup.find_all("img", src=re.compile(r"cdn/shop/files")):
+        src = tag.get("src", "")
+        # Prefer high-resolution versions
+        clean = re.sub(r"\?.*", "", src)
+        if clean and clean not in images:
+            images.append(clean)
+    return images
+
+
+def parse_ingredients(soup: BeautifulSoup, shopify: dict) -> str | None:
+    # Try Shopify body_html first
+    body = shopify.get("body_html", "")
+    if body:
+        bsoup = BeautifulSoup(body, "html.parser")
+        for tag in bsoup.find_all(["p", "div", "span"]):
+            t = tag.get_text(strip=True)
+            if t.lower().startswith("water") or "aqua" in t.lower():
+                return t
+
+    # Try HTML page
+    ing_heading = soup.find(string=re.compile(r"ingr[eé]dients?", re.I))
+    if ing_heading:
+        sibling = ing_heading.find_next(["p", "div", "span"])
+        if sibling:
+            return text(sibling)
+    return None
+
+
+def parse_labels(soup: BeautifulSoup) -> list[str]:
+    labels = []
+    label_section = soup.find("div", string=re.compile(r"labels?", re.I))
+    if not label_section:
+        label_section = soup.find(id=re.compile(r"labels?", re.I))
+    if label_section:
+        for img in label_section.find_all("img"):
+            alt = img.get("alt", "").strip()
+            if alt:
+                labels.append(alt)
+    # Fallback: look for label images near the page bottom
+    if not labels:
+        for img in soup.find_all("img", alt=re.compile(r"logo (vegan|natrue|bdih|bio|cosmos)", re.I)):
+            alt = img.get("alt", "").strip()
+            if alt and alt not in labels:
+                labels.append(alt)
+    return labels
+
+
+def parse_skin_types(soup: BeautifulSoup) -> list[str]:
+    skin_heading = soup.find(string=re.compile(r"types? de peaux?|skin type", re.I))
+    if skin_heading:
+        sibling = skin_heading.find_next(["p", "div", "span", "li"])
+        if sibling:
+            raw = text(sibling)
+            if raw:
+                return [s.strip() for s in re.split(r"[,&]|et\b", raw) if s.strip()]
+    return []
+
+
+def parse_volume(soup: BeautifulSoup, shopify: dict) -> str | None:
+    if shopify.get("variants"):
+        for v in shopify["variants"]:
+            title = v.get("title", "")
+            if re.search(r"\d+\s*(ml|g|cl|l\b)", title, re.I):
+                return title
+    # From the page
+    vol = soup.find(string=re.compile(r"\d+\s*ml", re.I))
+    if vol:
+        m = re.search(r"\d+\s*ml", vol, re.I)
+        return m.group(0) if m else None
+    return None
+
+
+def parse_usage(soup: BeautifulSoup) -> str | None:
+    usage_heading = soup.find(string=re.compile(r"conseil.*utilisation|how to use", re.I))
+    if usage_heading:
+        container = usage_heading.find_parent()
+        if container:
+            next_el = container.find_next_sibling()
+            if next_el:
+                return next_el.get_text(separator=" ", strip=True)
+    return None
+
+
+def parse_tags(shopify: dict) -> list[str]:
+    return shopify.get("tags", [])
+
+
+# ---------------------------------------------------------------------------
+# Main scraper
+# ---------------------------------------------------------------------------
+
+def scrape_product(url: str) -> dict:
+    print(f"[*] Fetching page: {url}")
+    soup = fetch_page(url)
+
+    print("[*] Fetching Shopify JSON endpoint …")
+    shopify = fetch_shopify_json(url)
+
+    print("[*] Parsing data …")
+
+    basic = parse_basic_info(soup, shopify)
+    price = parse_price(soup, shopify)
+
+    product = {
+        # Identifiers
+        "url": url,
+        "sku": basic["sku"],
+        "shopify_product_id": shopify.get("id"),
+        # Content
+        "title": basic["title"],
+        "brand": basic["brand"],
+        "description": basic["description"],
+        # Pricing & availability
+        "price": price.get("price"),
+        "compare_at_price": price.get("compare_at_price"),
+        "currency": price.get("currency", "CHF"),
+        "availability": parse_availability(soup, shopify),
+        # Product details
+        "volume": parse_volume(soup, shopify),
+        "skin_types": parse_skin_types(soup),
+        "ingredients": parse_ingredients(soup, shopify),
+        "usage_instructions": parse_usage(soup),
+        # Media & meta
+        "images": parse_images(soup, shopify),
+        "labels": parse_labels(soup),
+        "tags": parse_tags(shopify),
+        # Shopify variants (full detail)
+        "variants": [
+            {
+                "id": v.get("id"),
+                "title": v.get("title"),
+                "price": v.get("price"),
+                "sku": v.get("sku"),
+                "available": v.get("available"),
+            }
+            for v in shopify.get("variants", [])
+        ],
+        # Scraped at
+        "scraped_at": datetime.utcnow().isoformat() + "Z",
+    }
+
+    return product
+
+
+# ---------------------------------------------------------------------------
+# CLI entry point
+# ---------------------------------------------------------------------------
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Scrape a green-shop.ch product page and save as JSON."
+    )
+    parser.add_argument("url", help="Full product URL")
+    parser.add_argument(
+        "--output", "-o",
+        default=None,
+        help="Output JSON file path (default: <product-handle>.json)",
+    )
+    args = parser.parse_args()
+
+    data = scrape_product(args.url)
+
+    # Derive output filename from URL slug if not provided
+    if args.output:
+        out_path = Path(args.output)
+    else:
+        slug = args.url.rstrip("/").split("/")[-1]
+        out_path = Path(f"{slug}.json")
+
+    out_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[✓] Saved to {out_path}")
+    print(json.dumps(data, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()
