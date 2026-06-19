@@ -21,9 +21,7 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 }
 
-# ── Only this category will be scraped ──────────────────────────────────────
 CATEGORY_URL = "https://www.naturalex.shop/cosmetique-hygiene-c102x4343963"
-# ─────────────────────────────────────────────────────────────────────────────
 
 MAX_CONCURRENT = 15
 DELAY = 0.15
@@ -48,15 +46,10 @@ async def fetch_page(client: httpx.AsyncClient, url: str, retries: int = 3):
 
 
 def get_category_product_urls(category_url: str) -> list[str]:
-    """
-    Crawl all pages of a single category and return product URLs.
-    Uses the same ?page=N pagination as the catalogue.
-    """
     logger.info(f"Crawling category: {category_url}")
     product_urls: list[str] = []
     seen: set[str] = set()
 
-    # Fetch page 1 to discover total pages
     try:
         r = httpx.get(category_url, headers=HEADERS, timeout=30.0)
         r.raise_for_status()
@@ -76,16 +69,13 @@ def get_category_product_urls(category_url: str) -> list[str]:
                     product_urls.append(full)
 
     def get_total_pages(html: str) -> int:
-        # Category pages use direct ?page=N links (not GoToPage())
-        # e.g. href="…c102x4343963?page=12"  — we want the highest number
         pages = re.findall(r'[?&]page=(\d+)', html)
         if pages:
             return max(int(p) for p in pages)
-        # Fallback: GoToPage() used on the global catalogue
         pages = re.findall(r'GoToPage\((\d+)\)', html)
         return max((int(p) for p in pages), default=1)
 
-    extract_links(html)          # ← page 1 products
+    extract_links(html)
     total_pages = get_total_pages(html)
     logger.info(f"Category has {total_pages} page(s), {len(product_urls)} products on page 1")
 
@@ -95,8 +85,7 @@ def get_category_product_urls(category_url: str) -> list[str]:
         try:
             r = httpx.get(url, headers=HEADERS, timeout=30.0)
             r.raise_for_status()
-            page_html = r.content.decode('utf-8', errors='replace')
-            extract_links(page_html)
+            extract_links(r.content.decode('utf-8', errors='replace'))
         except Exception as e:
             logger.warning(f"Failed to fetch page {page}: {e}")
         time.sleep(0.3)
@@ -105,66 +94,84 @@ def get_category_product_urls(category_url: str) -> list[str]:
     return product_urls
 
 
-def extract_sku(html):
-    if not html or not isinstance(html, str):
-        return None
-    match = re.search(r'(?:\(Code:|\bCode:)\s*([A-Z0-9-]+)', html, re.I)
-    return match.group(1).strip() if match else None
+def extract_jsonld_product(soup) -> dict | None:
+    """
+    Return the parsed Product JSON-LD block for this page, if present.
 
-def extract_gtin13(soup):
+    This is the authoritative source for sku, name, description, brand and
+    gtin13 — it's structured data the site itself publishes, so it's far
+    more reliable than scraping it back out of rendered HTML.
+    """
     for script in soup.find_all("script", type="application/ld+json"):
+        if not script.string:
+            continue
         try:
             data = json.loads(script.string)
         except (json.JSONDecodeError, TypeError):
             continue
         if isinstance(data, dict) and data.get("@type") == "Product":
-            gtin = data.get("gtin13")
-            if gtin:
-                return gtin
-    return ""
+            return data
+    return None
+
+
+def clean_title(raw: str) -> str:
+    if not raw:
+        return raw
+    # Strip a trailing "*" / "**" footnote marker some titles carry
+    raw = re.sub(r'\*+\s*$', '', raw.strip())
+    return re.sub(r'\s+', ' ', raw).strip()
+
 
 def extract_product_data(html: str, url: str):
     soup = BeautifulSoup(html, 'html.parser')
+    jsonld = extract_jsonld_product(soup)
 
-    # Title
-    title_tag = soup.find('h1') or soup.find('title')
-    title = title_tag.get_text(strip=True) if title_tag else None
-    if title and " - " in title:
-        title = title.split(" - ")[0]
-
-    # Article ID
+    # Article ID (still only reliably available from the URL)
     article_match = re.search(r'-c2x(\d+)', url)
     article_id = article_match.group(1) if article_match else None
     if not article_id:
         return None, None
 
-    sku = extract_sku(html)
-    gtin13 = extract_gtin13(soup)
+    # --- Title: prefer JSON-LD "name", fall back to <h1>/<title> ---
+    if jsonld and jsonld.get("name"):
+        title = clean_title(jsonld["name"])
+    else:
+        title_tag = soup.find('h1') or soup.find('title')
+        title = title_tag.get_text(strip=True) if title_tag else None
+        if title:
+            title = re.split(r'\s*-\s*(Naturalex|www\.naturalex\.shop)', title, flags=re.I)[0].strip()
+            title = re.sub(r'\s+', ' ', title).strip()
 
-    # Vendor
+    # --- SKU: prefer JSON-LD "sku", fall back to "(Code: ...)" scrape ---
+    sku = (jsonld.get("sku") if jsonld else None) or extract_sku(html)
+
+    # --- GTIN13: from JSON-LD ---
+    gtin13 = (jsonld.get("gtin13") if jsonld else "") or ""
+
+    # --- Vendor: prefer JSON-LD "brand.name", fall back to title regex ---
     vendor = None
-    if title:
-        v_match = re.search(r',\s*([^,]+?)\s*,\s*\d+[gmlkg]', title, re.I)
-        if v_match:
-            vendor = v_match.group(1).strip()
+    if jsonld and isinstance(jsonld.get("brand"), dict):
+        vendor = jsonld["brand"].get("name")
+    if not vendor:
+        vendor = extract_vendor(title, soup)
 
-    # Product Type
-    product_type = None
-    for link in soup.find_all('a', href=True):
-        if 'c102x' in link.get('href', ''):
-            cat = link.get_text(strip=True)
-            if cat and len(cat) > 4 and "continuer" not in cat.lower():
-                product_type = cat
-                break
+    # --- Description: prefer JSON-LD "description" (full HTML incl. ---
+    # --- ingredients/origin), fall back to scraped span/td ---
+    if jsonld and jsonld.get("description"):
+        description_html = jsonld["description"]
+    else:
+        desc = (soup.find('span', class_=re.compile('PBItemDesc')) or
+                soup.find('td', colspan=True))
+        description_html = str(desc) if desc else None
 
-    # Description
-    desc = (soup.find('span', class_=re.compile('PBItemDesc')) or
-            soup.find('td', colspan=True))
-    description_html = str(desc) if desc else None
-
-    # Price
+    # --- Price: meta tag first, JSON-LD offers.price as fallback ---
     price_tag = soup.find('meta', itemprop='price')
     meta_price = float(price_tag['content']) if price_tag and price_tag.get('content') else 0.0
+    if meta_price == 0.0 and jsonld and isinstance(jsonld.get("offers"), dict):
+        try:
+            meta_price = float(jsonld["offers"].get("price", 0) or 0)
+        except (TypeError, ValueError):
+            meta_price = 0.0
 
     strike_tag = soup.find('div', class_='PBStrike')
     compare_price = 0.0
@@ -183,8 +190,8 @@ def extract_product_data(html: str, url: str):
         final_cost = meta_price
         final_compare = compare_price
     else:
-        final_cost = meta_price
-        final_compare = None
+        final_cost = None
+        final_compare = meta_price
 
     # Images
     images = []
@@ -208,7 +215,7 @@ def extract_product_data(html: str, url: str):
         "article_id": article_id,
         "title": title,
         "descriptionHtml": description_html,
-        "productType": product_type,
+        "productType": "Cosmétique & Hygiène",
         "vendor": vendor,
         "images": images_str,
         "video_originalSource": "",
@@ -236,6 +243,23 @@ def extract_product_data(html: str, url: str):
     return product, variant
 
 
+def extract_vendor(title: str, soup) -> str:
+    vendor = None
+    if title:
+        # Look for common brand patterns after the first comma
+        match = re.search(r',\s*([^,*]+?)(?:\s*,\s*|\s*\*|$)', title.strip(), re.I)
+        if match:
+            vendor = match.group(1).strip()
+    return vendor or ""
+
+
+def extract_sku(html):
+    if not html or not isinstance(html, str):
+        return None
+    match = re.search(r'(?:\(Code:|\bCode:)\s*([A-Z0-9-]+)', html, re.I)
+    return match.group(1).strip() if match else None
+
+
 async def scrape_product(client: httpx.AsyncClient, url: str):
     if not re.search(r'-c2x\d+', url):
         return None, None
@@ -257,7 +281,6 @@ async def main():
     start_time = time.time()
     logger.info("Starting — single category mode")
 
-    # ← Only change vs the original: call get_category_product_urls instead of get_all_product_urls
     product_urls = get_category_product_urls(CATEGORY_URL)
 
     if not product_urls:
@@ -294,7 +317,7 @@ async def main():
                   ensure_ascii=False, indent=2)
 
     total_time = time.time() - start_time
-    logger.info(f"{len(products)} products saved to {filename}")
+    logger.info(f"✅ {len(products)} products saved to {filename}")
     logger.info(f"Total time: {total_time:.1f}s ({total_time / 60:.1f} min)")
 
 
