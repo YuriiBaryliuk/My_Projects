@@ -300,7 +300,7 @@ async def main():
                     variants.append(var)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"naturalex_all_products_{timestamp}.json"
+    filename = f"naturalex_all_products.json"
 
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump({"products": products, "variants": variants}, f,
